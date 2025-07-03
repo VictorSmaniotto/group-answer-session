@@ -2,119 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Google-inspired design system for real-time quiz app */
+/* Minimalist modern design system */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 210 10% 23%;
+    --background: 0 0% 98%;
+    --foreground: 0 0% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 10% 23%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 10% 23%;
+    --popover-foreground: 0 0% 10%;
 
-    /* Google-inspired primary colors */
-    --primary: 217 91% 60%; /* Google Blue */
+    /* Modern vibrant colors */
+    --primary: 250 100% 60%; /* Vibrant Purple */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 210 10% 23%;
+    --secondary: 200 100% 50%; /* Bright Cyan */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-
-    --accent: 139 75% 53%; /* Google Green */
+    --accent: 310 100% 60%; /* Magenta */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 4 90% 58%; /* Google Red */
+    --success: 150 100% 50%; /* Bright Green */
+    --success-foreground: 0 0% 100%;
+
+    --warning: 45 100% 60%; /* Golden Yellow */
+    --warning-foreground: 0 0% 10%;
+
+    --destructive: 0 100% 60%; /* Bright Red */
     --destructive-foreground: 0 0% 100%;
 
-    --warning: 45 93% 58%; /* Google Yellow */
-    --warning-foreground: 210 10% 23%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 40%;
 
-    --border: 217 32% 17%;
+    --border: 0 0% 90%;
     --input: 0 0% 100%;
-    --ring: 217 91% 60%;
+    --ring: 250 100% 60%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Quiz-specific colors */
-    --quiz-blue: 217 91% 60%;
-    --quiz-green: 139 75% 53%;
-    --quiz-yellow: 45 93% 58%;
-    --quiz-red: 4 90% 58%;
-    --quiz-purple: 267 66% 61%;
-    --quiz-orange: 27 96% 61%;
+    /* Modern gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(250 100% 60%) 0%, hsl(310 100% 60%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(200 100% 50%) 0%, hsl(250 100% 60%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(310 100% 60%) 0%, hsl(0 100% 60%) 100%);
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 91% 70%) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(139 75% 53%) 0%, hsl(139 75% 63%) 100%);
-    --gradient-warm: linear-gradient(135deg, hsl(45 93% 58%) 0%, hsl(27 96% 61%) 100%);
+    /* Subtle shadows */
+    --shadow-sm: 0 1px 3px 0 hsl(0 0% 0% / 0.1);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1);
 
-    /* Shadows */
-    --shadow-soft: 0 2px 8px -2px hsl(217 91% 60% / 0.1);
-    --shadow-medium: 0 4px 16px -4px hsl(217 91% 60% / 0.15);
-    --shadow-strong: 0 8px 32px -8px hsl(217 91% 60% / 0.2);
+    /* Smooth transitions */
+    --transition-fast: all 0.15s ease-out;
+    --transition-normal: all 0.25s ease-out;
+    --transition-slow: all 0.35s ease-out;
 
-    /* Animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 0 0% 5%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 250 100% 70%;
+    --primary-foreground: 0 0% 10%;
+    --secondary: 200 100% 60%;
+    --secondary-foreground: 0 0% 10%;
+    --accent: 310 100% 70%;
+    --accent-foreground: 0 0% 10%;
+    --success: 150 100% 60%;
+    --success-foreground: 0 0% 10%;
+    --warning: 45 100% 70%;
+    --warning-foreground: 0 0% 10%;
+    --destructive: 0 100% 70%;
+    --destructive-foreground: 0 0% 10%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --border: 0 0% 20%;
+    --input: 0 0% 8%;
+    --ring: 250 100% 70%;
   }
 }
 
@@ -124,102 +93,82 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 }
 
 @layer components {
-  /* Quiz-specific component styles */
-  .quiz-card {
-    @apply bg-card rounded-xl shadow-[var(--shadow-medium)] border border-border/50 transition-[var(--transition-smooth)];
+  /* Modern minimalist buttons */
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold px-8 py-4 rounded-2xl shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-[var(--transition-normal)] hover:scale-105 active:scale-95;
   }
 
-  .quiz-card:hover {
-    @apply shadow-[var(--shadow-strong)] translate-y-[-2px];
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground font-semibold px-8 py-4 rounded-2xl shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-[var(--transition-normal)] hover:scale-105 active:scale-95;
   }
 
-  .quiz-button-primary {
-    @apply bg-[var(--gradient-primary)] text-primary-foreground font-medium px-6 py-3 rounded-xl shadow-[var(--shadow-soft)] transition-[var(--transition-bounce)] hover:shadow-[var(--shadow-medium)] hover:scale-105 active:scale-95;
+  .btn-outline {
+    @apply border-2 border-primary text-primary bg-transparent font-semibold px-8 py-4 rounded-2xl hover:bg-primary hover:text-primary-foreground transition-[var(--transition-normal)] hover:scale-105 active:scale-95;
   }
 
-  .quiz-button-secondary {
-    @apply bg-card text-card-foreground border border-border font-medium px-6 py-3 rounded-xl shadow-[var(--shadow-soft)] transition-[var(--transition-smooth)] hover:shadow-[var(--shadow-medium)] hover:bg-secondary;
+  /* Modern cards */
+  .card-modern {
+    @apply bg-card rounded-3xl shadow-[var(--shadow-md)] border border-border p-8 transition-[var(--transition-normal)] hover:shadow-[var(--shadow-lg)] hover:-translate-y-1;
   }
 
-  .quiz-option {
-    @apply p-4 rounded-xl border border-border bg-card cursor-pointer transition-[var(--transition-smooth)] hover:shadow-[var(--shadow-soft)] hover:border-primary/50;
+  /* Option styles */
+  .option-card {
+    @apply p-6 rounded-2xl border-2 border-border bg-card cursor-pointer transition-[var(--transition-fast)] hover:border-primary hover:shadow-[var(--shadow-md)] text-left font-medium;
   }
 
-  .quiz-option-selected {
-    @apply border-primary bg-primary/5 shadow-[var(--shadow-soft)];
+  .option-card-selected {
+    @apply border-primary bg-gradient-to-r from-primary/10 to-accent/10 shadow-[var(--shadow-md)];
   }
 
-  .quiz-progress-bar {
-    @apply w-full bg-secondary rounded-full h-3 overflow-hidden;
+  /* Progress bar */
+  .progress-modern {
+    @apply w-full bg-muted rounded-full h-4 overflow-hidden;
   }
 
-  .quiz-progress-fill {
-    @apply h-full bg-[var(--gradient-primary)] transition-all duration-500 ease-out;
+  .progress-fill {
+    @apply h-full bg-gradient-to-r from-primary to-accent transition-all duration-700 ease-out rounded-full;
   }
 }
 
 @layer utilities {
-  /* Animation utilities */
+  /* Modern animations */
   .animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
-  }
-
-  .animate-scale-in {
-    animation: scaleIn 0.2s ease-out;
-  }
-
-  .animate-bounce-in {
-    animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    animation: fadeIn 0.4s ease-out;
   }
 
   .animate-slide-up {
-    animation: slideUp 0.3s ease-out;
+    animation: slideUp 0.4s ease-out;
   }
 
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  .animate-bounce-soft {
+    animation: bounceSoft 0.6s ease-out;
+  }
+
+  /* Text gradient utilities */
+  .text-gradient-primary {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  .text-gradient-secondary {
+    @apply bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent;
+  }
+
+  .text-gradient-accent {
+    @apply bg-gradient-to-r from-accent to-destructive bg-clip-text text-transparent;
+  }
+
+  /* Keyframes */
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  @keyframes bounceIn {
-    from {
-      opacity: 0;
-      transform: scale(0.3);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1.05);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  @keyframes slideUp {
     from {
       opacity: 0;
       transform: translateY(20px);
@@ -230,20 +179,40 @@
     }
   }
 
-  /* Confetti animation for quiz completion */
-  @keyframes confetti {
-    0% {
-      transform: translateY(-100vh) rotate(0deg);
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
     }
-    100% {
-      transform: translateY(100vh) rotate(720deg);
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
-  .confetti {
-    position: fixed;
-    width: 10px;
-    height: 10px;
-    animation: confetti 3s linear infinite;
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes bounceSoft {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(20px);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.05) translateY(-5px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
   }
 }

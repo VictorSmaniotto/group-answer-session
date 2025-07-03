@@ -1,6 +1,5 @@
 import React from 'react';
 import { useQuiz } from '../contexts/QuizContext';
-import { Button } from './ui/button';
 
 export default function QuestionManager() {
   const { state, dispatch } = useQuiz();
@@ -12,11 +11,11 @@ export default function QuestionManager() {
   const getQuestionTypeLabel = (type: string) => {
     switch (type) {
       case 'single-choice':
-        return 'Múltipla Escolha (Única)';
+        return 'Escolha Única';
       case 'multi-choice':
-        return 'Múltipla Escolha (Múltipla)';
+        return 'Múltiplas Escolhas';
       case 'text-input':
-        return 'Texto Livre';
+        return 'Resposta Livre';
       default:
         return type;
     }
@@ -24,45 +23,48 @@ export default function QuestionManager() {
 
   if (state.questions.length === 0) {
     return (
-      <div className="quiz-card p-6 text-center animate-scale-in">
-        <div className="w-16 h-16 bg-muted rounded-full mx-auto mb-4 flex items-center justify-center text-2xl">
-          📝
+      <div className="card-modern text-center animate-scale-in">
+        <div className="w-20 h-20 bg-gradient-to-r from-muted to-muted-foreground/20 rounded-3xl mx-auto mb-6 flex items-center justify-center">
+          <span className="text-2xl">?</span>
         </div>
-        <h3 className="text-lg font-semibold mb-2">Nenhuma pergunta criada</h3>
-        <p className="text-muted-foreground">
-          Adicione sua primeira pergunta para começar!
+        <h3 className="text-xl font-bold mb-3 text-gradient-accent">
+          Nenhuma pergunta criada
+        </h3>
+        <p className="text-muted-foreground text-lg">
+          Adicione sua primeira pergunta para começar
         </p>
       </div>
     );
   }
 
   return (
-    <div className="quiz-card p-6 animate-scale-in">
-      <h2 className="text-xl font-semibold mb-4">
-        Perguntas ({state.questions.length})
+    <div className="card-modern animate-scale-in">
+      <h2 className="text-2xl font-bold mb-6">
+        <span className="text-gradient-primary">Perguntas</span>{' '}
+        <span className="text-muted-foreground">({state.questions.length})</span>
       </h2>
       
       <div className="space-y-4">
         {state.questions.map((question, index) => (
-          <div key={question.id} className="border border-border rounded-xl p-4 bg-card/50">
+          <div key={question.id} className="border-2 border-border rounded-2xl p-6 bg-card/50 transition-[var(--transition-normal)] hover:border-primary/50">
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="bg-primary text-primary-foreground px-2 py-1 rounded-md text-sm font-medium">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="bg-gradient-to-r from-primary to-accent text-white px-3 py-1 rounded-xl text-sm font-bold">
                     {index + 1}
                   </span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm font-semibold text-secondary">
                     {getQuestionTypeLabel(question.type)}
                   </span>
                 </div>
                 
-                <p className="font-medium mb-2">{question.text}</p>
+                <p className="font-semibold text-lg mb-4 text-foreground">{question.text}</p>
                 
                 {question.options && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {question.options.map((option, optIndex) => (
-                      <div key={optIndex} className="text-sm bg-muted/50 px-3 py-2 rounded-lg">
-                        {String.fromCharCode(65 + optIndex)}. {option}
+                      <div key={optIndex} className="text-sm bg-muted/50 px-4 py-3 rounded-xl border border-border">
+                        <span className="font-semibold text-primary">{String.fromCharCode(65 + optIndex)}.</span> {option}
                       </div>
                     ))}
                   </div>
@@ -72,10 +74,10 @@ export default function QuestionManager() {
               {!state.isQuizStarted && (
                 <button
                   onClick={() => handleRemoveQuestion(question.id)}
-                  className="text-destructive hover:bg-destructive/10 p-2 rounded-lg transition-colors"
+                  className="text-destructive hover:bg-destructive/10 p-3 rounded-xl transition-[var(--transition-fast)] font-bold text-lg"
                   title="Remover pergunta"
                 >
-                  🗑️
+                  ×
                 </button>
               )}
             </div>

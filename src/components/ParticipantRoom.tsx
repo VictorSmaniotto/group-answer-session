@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useQuiz } from '../contexts/QuizContext';
-import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 
 interface ParticipantRoomProps {
@@ -14,15 +13,13 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
 
   // Simulate receiving questions from host
   useEffect(() => {
-    // In a real app, this would listen to WebSocket messages from the host
     const simulateQuestionReceived = () => {
       if (state.roomId && !state.currentQuestion) {
-        // Simulate receiving the first question
         const demoQuestion = {
           id: 'demo1',
-          text: 'Quão confiante você estava sobre as demandas recebidas nesse primeiro semestre?',
+          text: 'Como você avalia nossa comunicação interna?',
           type: 'single-choice' as const,
-          options: ['Totalmente confiante', 'Muito confiante', 'Pouco confiante', 'Nada confiante']
+          options: ['Excelente', 'Boa', 'Regular', 'Precisa melhorar']
         };
         
         setTimeout(() => {
@@ -68,7 +65,6 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
       }
     });
 
-    // Reset for next question
     setSelectedAnswers([]);
     setTextAnswer('');
   };
@@ -79,20 +75,20 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
 
   if (state.isQuizFinished) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-accent/10 via-background to-primary/5 flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center animate-bounce-in">
-          <div className="w-24 h-24 bg-[var(--gradient-success)] rounded-full mx-auto mb-6 flex items-center justify-center text-white text-4xl">
-            🎉
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="max-w-md w-full text-center animate-bounce-soft">
+          <div className="w-24 h-24 bg-gradient-to-r from-success to-accent rounded-full mx-auto mb-8 flex items-center justify-center">
+            <span className="text-white text-4xl">✓</span>
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-4">
-            Questionário Finalizado!
+          <h1 className="text-4xl font-bold mb-4">
+            <span className="text-gradient-primary">Quiz Finalizado!</span>
           </h1>
-          <p className="text-muted-foreground mb-8">
+          <p className="text-muted-foreground text-xl mb-8">
             Obrigado por participar! Suas respostas foram registradas.
           </p>
           <button
             onClick={onLeaveRoom}
-            className="quiz-button-primary"
+            className="btn-primary text-lg py-4 px-8"
           >
             Voltar ao Início
           </button>
@@ -102,97 +98,101 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent/10 via-background to-primary/5 p-4">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6 animate-fade-in">
+        <div className="flex justify-between items-center mb-8 animate-fade-in">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Olá, {state.participantName}! 👋
+            <h1 className="text-3xl font-bold mb-2">
+              <span className="text-gradient-primary">Olá, {state.participantName}!</span>
             </h1>
-            <p className="text-muted-foreground">Sala: {state.roomId}</p>
+            <p className="text-muted-foreground text-lg">Sala: <span className="font-mono font-bold">{state.roomId}</span></p>
           </div>
           
           <button
             onClick={onLeaveRoom}
-            className="quiz-button-secondary text-sm"
+            className="btn-outline px-4 py-2"
           >
             Sair
           </button>
         </div>
 
         {/* Content */}
-        <div className="quiz-card p-6 animate-scale-in">
+        <div className="card-modern animate-scale-in">
           {!state.currentQuestion && !state.hasAnsweredCurrentQuestion ? (
             // Waiting for quiz to start
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-[var(--gradient-warm)] rounded-full mx-auto mb-6 flex items-center justify-center text-white text-2xl animate-pulse">
-                ⏳
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-gradient-to-r from-warning to-accent rounded-full mx-auto mb-8 flex items-center justify-center animate-pulse">
+                <span className="text-white text-2xl">⏳</span>
               </div>
-              <h2 className="text-xl font-semibold mb-2">Aguardando início...</h2>
-              <p className="text-muted-foreground">
-                O anfitrião está preparando as perguntas. Por favor, aguarde!
+              <h2 className="text-2xl font-bold mb-4">
+                <span className="text-gradient-secondary">Aguardando início...</span>
+              </h2>
+              <p className="text-muted-foreground text-lg">
+                O anfitrião está preparando as perguntas
               </p>
             </div>
           ) : state.hasAnsweredCurrentQuestion ? (
             // Answer submitted, waiting for next question
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-[var(--gradient-success)] rounded-full mx-auto mb-6 flex items-center justify-center text-white text-2xl">
-                ✓
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-gradient-to-r from-success to-accent rounded-full mx-auto mb-8 flex items-center justify-center">
+                <span className="text-white text-2xl">✓</span>
               </div>
-              <h2 className="text-xl font-semibold mb-2">Resposta enviada!</h2>
-              <p className="text-muted-foreground">
+              <h2 className="text-2xl font-bold mb-4">
+                <span className="text-gradient-primary">Resposta enviada!</span>
+              </h2>
+              <p className="text-muted-foreground text-lg">
                 Aguardando a próxima pergunta...
               </p>
             </div>
           ) : state.currentQuestion ? (
             // Active question
             <div className="animate-slide-up">
-              <h2 className="text-xl font-semibold mb-6 text-center">
+              <h2 className="text-2xl font-bold mb-8 text-center text-foreground">
                 {state.currentQuestion.text}
               </h2>
 
               {state.currentQuestion.type === 'text-input' ? (
                 // Text input
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <Textarea
                     value={textAnswer}
                     onChange={(e) => setTextAnswer(e.target.value)}
                     placeholder="Digite sua resposta aqui..."
-                    className="rounded-xl min-h-[120px]"
-                    rows={4}
+                    className="text-lg py-4 px-6 rounded-2xl border-2 min-h-[150px]"
+                    rows={6}
                   />
                   
                   <button
                     onClick={handleSubmitAnswer}
                     disabled={!textAnswer.trim()}
-                    className="quiz-button-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-primary w-full text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     Enviar Resposta
                   </button>
                 </div>
               ) : (
                 // Multiple choice
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {state.currentQuestion.options?.map((option, index) => (
                     <button
                       key={index}
                       onClick={() => handleOptionSelect(option)}
-                      className={`quiz-option w-full text-left ${
-                        selectedAnswers.includes(option) ? 'quiz-option-selected' : ''
+                      className={`option-card w-full ${
+                        selectedAnswers.includes(option) ? 'option-card-selected' : ''
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      <div className="flex items-center gap-4">
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-[var(--transition-fast)] ${
                           selectedAnswers.includes(option) 
                             ? 'border-primary bg-primary' 
                             : 'border-border'
                         }`}>
                           {selectedAnswers.includes(option) && (
-                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                            <div className="w-3 h-3 bg-white rounded-full"></div>
                           )}
                         </div>
-                        <span className="flex-1">{option}</span>
+                        <span className="flex-1 text-lg font-medium">{option}</span>
                       </div>
                     </button>
                   ))}
@@ -200,7 +200,7 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
                   {isAnswerSelected && (
                     <button
                       onClick={handleSubmitAnswer}
-                      className="quiz-button-primary w-full mt-6 animate-scale-in"
+                      className="btn-primary w-full text-lg py-4 mt-8 animate-scale-in"
                     >
                       Confirmar Resposta
                     </button>
@@ -211,9 +211,11 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
           ) : null}
         </div>
 
-        {/* Help text */}
-        <div className="mt-6 text-center text-sm text-muted-foreground animate-fade-in">
-          <p>💡 Suas respostas são anônimas e seguras</p>
+        {/* Footer */}
+        <div className="mt-8 text-center animate-fade-in">
+          <p className="text-muted-foreground">
+            Suas respostas são <span className="text-gradient-accent font-semibold">seguras e anônimas</span>
+          </p>
         </div>
       </div>
     </div>

@@ -1,13 +1,11 @@
 import React from 'react';
 import { useQuiz } from '../contexts/QuizContext';
-import { Button } from './ui/button';
 
 export default function QuizController() {
   const { state, dispatch } = useQuiz();
 
   const handleStartQuiz = () => {
     dispatch({ type: 'START_QUIZ' });
-    // Simulate sending first question to participants
     if (state.questions.length > 0) {
       dispatch({ type: 'SET_CURRENT_QUESTION', question: state.questions[0] });
     }
@@ -33,25 +31,27 @@ export default function QuizController() {
 
   if (!state.isQuizStarted && !state.isQuizFinished) {
     return (
-      <div className="quiz-card p-6 animate-scale-in">
-        <h2 className="text-xl font-semibold mb-4">Controle do Questionário</h2>
+      <div className="card-modern animate-scale-in">
+        <h2 className="text-2xl font-bold mb-6">
+          <span className="text-gradient-primary">Controle do Quiz</span>
+        </h2>
         
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="bg-card/50 p-3 rounded-lg border border-border">
-              <span className="text-muted-foreground">Perguntas:</span>
-              <p className="font-bold text-lg">{state.questions.length}</p>
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 rounded-2xl border border-primary/20">
+              <span className="text-muted-foreground font-medium">Perguntas:</span>
+              <p className="font-bold text-3xl text-primary">{state.questions.length}</p>
             </div>
-            <div className="bg-card/50 p-3 rounded-lg border border-border">
-              <span className="text-muted-foreground">Participantes:</span>
-              <p className="font-bold text-lg">{state.participants.length}</p>
+            <div className="bg-gradient-to-r from-secondary/10 to-accent/10 p-6 rounded-2xl border border-secondary/20">
+              <span className="text-muted-foreground font-medium">Participantes:</span>
+              <p className="font-bold text-3xl text-secondary">{state.participants.length}</p>
             </div>
           </div>
 
           {!canStartQuiz && (
-            <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
-              <p className="text-sm text-warning-foreground">
-                ⚠️ {state.questions.length === 0 && 'Adicione pelo menos uma pergunta. '}
+            <div className="bg-warning/10 border-2 border-warning/20 rounded-2xl p-6">
+              <p className="text-warning-foreground font-semibold text-lg">
+                {state.questions.length === 0 && 'Adicione pelo menos uma pergunta. '}
                 {state.participants.length === 0 && 'Aguardando participantes entrarem na sala.'}
               </p>
             </div>
@@ -60,9 +60,9 @@ export default function QuizController() {
           <button
             onClick={handleStartQuiz}
             disabled={!canStartQuiz}
-            className="quiz-button-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary w-full text-xl py-6 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
-            🚀 Iniciar Questionário
+            <span className="font-bold">Iniciar Quiz</span>
           </button>
         </div>
       </div>
@@ -71,24 +71,26 @@ export default function QuizController() {
 
   if (state.isQuizFinished) {
     return (
-      <div className="quiz-card p-6 text-center animate-bounce-in">
-        <div className="w-16 h-16 bg-[var(--gradient-success)] rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl">
-          🎉
+      <div className="card-modern text-center animate-bounce-soft">
+        <div className="w-24 h-24 bg-gradient-to-r from-success to-accent rounded-full mx-auto mb-6 flex items-center justify-center">
+          <span className="text-white text-3xl">✓</span>
         </div>
-        <h2 className="text-xl font-semibold mb-2">Questionário Finalizado!</h2>
-        <p className="text-muted-foreground mb-6">
-          Todas as perguntas foram respondidas pelos participantes.
+        <h2 className="text-3xl font-bold mb-4">
+          <span className="text-gradient-primary">Quiz Finalizado!</span>
+        </h2>
+        <p className="text-muted-foreground text-lg mb-8">
+          Todas as perguntas foram respondidas pelos participantes
         </p>
         
-        <div className="space-y-3">
-          <button className="quiz-button-primary w-full">
-            📊 Exportar Resultados
+        <div className="space-y-4">
+          <button className="btn-primary w-full text-lg py-4">
+            <span className="font-semibold">Exportar Resultados</span>
           </button>
           <button
             onClick={() => dispatch({ type: 'LEAVE_ROOM' })}
-            className="quiz-button-secondary w-full"
+            className="btn-outline w-full text-lg py-4"
           >
-            🔄 Criar Nova Sala
+            Criar Nova Sala
           </button>
         </div>
       </div>
@@ -96,46 +98,50 @@ export default function QuizController() {
   }
 
   return (
-    <div className="quiz-card p-6 animate-scale-in">
-      <h2 className="text-xl font-semibold mb-4">Pergunta Atual</h2>
+    <div className="card-modern animate-scale-in">
+      <h2 className="text-2xl font-bold mb-6">
+        <span className="text-gradient-secondary">Pergunta Atual</span>
+      </h2>
       
-      <div className="space-y-4">
-        <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-primary">
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-primary/5 to-accent/5 border-2 border-primary/20 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-lg font-bold text-primary">
               Pergunta {state.currentQuestionIndex + 1} de {state.questions.length}
             </span>
-            <div className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-md">
+            <div className="text-sm bg-gradient-to-r from-primary to-accent text-white px-3 py-1 rounded-xl font-bold">
               {currentQuestion?.type === 'single-choice' ? 'Única' : 
                currentQuestion?.type === 'multi-choice' ? 'Múltipla' : 'Texto'}
             </div>
           </div>
-          <p className="font-medium">{currentQuestion?.text}</p>
+          <p className="font-semibold text-xl text-foreground">{currentQuestion?.text}</p>
           
           {currentQuestion?.options && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
               {currentQuestion.options.map((option, index) => (
-                <div key={index} className="text-sm bg-card px-3 py-2 rounded-lg border border-border">
-                  {String.fromCharCode(65 + index)}. {option}
+                <div key={index} className="text-sm bg-card px-4 py-3 rounded-xl border border-border">
+                  <span className="font-bold text-primary">{String.fromCharCode(65 + index)}.</span> {option}
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           <button
             onClick={handleNextQuestion}
-            className="quiz-button-primary flex-1"
+            className="btn-primary flex-1 text-lg py-4"
           >
-            {isLastQuestion ? '🏁 Finalizar Questionário' : '➡️ Próxima Pergunta'}
+            <span className="font-semibold">
+              {isLastQuestion ? 'Finalizar Quiz' : 'Próxima Pergunta'}
+            </span>
           </button>
           
           <button
             onClick={handleFinishQuiz}
-            className="quiz-button-secondary"
+            className="btn-outline px-6 py-4"
           >
-            ⏹️ Parar
+            Parar
           </button>
         </div>
       </div>
