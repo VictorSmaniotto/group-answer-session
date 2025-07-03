@@ -157,4 +157,41 @@ export default class QuizServer implements Party.Server {
     // Broadcast the updated state
     this.room.broadcast(JSON.stringify({ type: 'sync', state: this.state }));
   }
+
+  // Handle HTTP requests (for health checks and debugging)
+  async onRequest(request: Party.Request): Promise<Response> {
+    const url = new URL(request.url);
+    
+    // Health check endpoint
+    if (url.pathname === '/health') {
+      return new Response(JSON.stringify({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        participants: this.state.participants.length,
+        questions: this.state.questions.length
+      }), {
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+    
+    // Default response for root path
+    if (url.pathname === '/' || url.pathname === '/test') {
+      return new Response(JSON.stringify({
+        message: 'Quiz Interativo PartyKit Server',
+        version: '1.0.0',
+        status: 'running',
+        timestamp: new Date().toISOString()
+      }), {
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    }
+    
+    return new Response('Not Found', { status: 404 });
+  }
 }

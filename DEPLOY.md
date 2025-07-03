@@ -6,8 +6,9 @@ Este guia contém todas as instruções para fazer o deploy do Quiz Interativo n
 
 - Conta na Digital Ocean com créditos
 - Git instalado
-- Docker instalado localmente
 - Node.js 18+ instalado
+
+**Importante**: Se você quiser testar o build Docker localmente, precisará instalar o Docker Desktop. Veja instruções em `DOCKER_SETUP.md`.
 
 ## 🎯 Opções de Deploy
 
