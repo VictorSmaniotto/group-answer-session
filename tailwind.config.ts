@@ -44,6 +44,10 @@ export default {
 					DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))'
 				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))'
+				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
 					foreground: 'hsl(var(--popover-foreground))'
@@ -51,6 +55,14 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				quiz: {
+					blue: 'hsl(var(--quiz-blue))',
+					green: 'hsl(var(--quiz-green))',
+					yellow: 'hsl(var(--quiz-yellow))',
+					red: 'hsl(var(--quiz-red))',
+					purple: 'hsl(var(--quiz-purple))',
+					orange: 'hsl(var(--quiz-orange))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
