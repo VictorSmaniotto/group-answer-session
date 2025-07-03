@@ -35,11 +35,11 @@ const SimpleBarChart = ({ data, colors }: { data: any[], colors: string[] }) => 
 };
 
 export default function ResultsDisplay() {
-  const { state } = useQuiz();
+  const { serverState } = useQuiz();
 
-  const currentQuestion = state.questions[state.currentQuestionIndex];
-  const currentAnswers = state.answers[currentQuestion?.id] || {};
-  const totalParticipants = state.participants.length;
+  const currentQuestion = serverState.questions[serverState.currentQuestionIndex];
+  const currentAnswers = serverState.answers[currentQuestion?.id] || {};
+  const totalParticipants = serverState.participants.length;
   const respondedCount = Object.keys(currentAnswers).length;
   const progressPercentage = totalParticipants > 0 ? (respondedCount / totalParticipants) * 100 : 0;
 
@@ -83,7 +83,7 @@ export default function ResultsDisplay() {
     if (currentQuestion?.type !== 'text-input') return [];
     
     return Object.entries(currentAnswers).map(([participantId, answers]) => {
-      const participant = state.participants.find(p => p.id === participantId);
+      const participant = serverState.participants.find(p => p.id === participantId);
       return {
         participantName: participant?.name || 'Anônimo',
         answer: answers[0] || ''

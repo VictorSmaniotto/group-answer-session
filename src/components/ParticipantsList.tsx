@@ -2,16 +2,16 @@ import React from 'react';
 import { useQuiz } from '../contexts/QuizContext';
 
 export default function ParticipantsList() {
-  const { state } = useQuiz();
+  const { serverState } = useQuiz();
 
   return (
     <div className="card-modern animate-scale-in h-fit sticky top-6">
       <h2 className="text-2xl font-bold mb-6">
         <span className="text-gradient-accent">Participantes</span>{' '}
-        <span className="text-muted-foreground">({state.participants.length})</span>
+        <span className="text-muted-foreground">({serverState.participants.length})</span>
       </h2>
       
-      {state.participants.length === 0 ? (
+      {serverState.participants.length === 0 ? (
         <div className="text-center py-8">
           <div className="w-16 h-16 bg-gradient-to-r from-muted to-muted-foreground/20 rounded-full mx-auto mb-4 flex items-center justify-center">
             <span className="text-xl">👥</span>
@@ -25,7 +25,7 @@ export default function ParticipantsList() {
         </div>
       ) : (
         <div className="space-y-3">
-          {state.participants.map((participant, index) => (
+          {serverState.participants.map((participant, index) => (
             <div 
               key={participant.id} 
               className="flex items-center gap-4 p-4 bg-card/50 rounded-2xl border border-border animate-fade-in transition-[var(--transition-normal)] hover:border-primary/50"
@@ -46,7 +46,7 @@ export default function ParticipantsList() {
         </div>
       )}
 
-      {state.participants.length > 0 && (
+      {serverState.participants.length > 0 && (
         <div className="mt-6 pt-6 border-t border-border">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground font-medium">Status:</span>

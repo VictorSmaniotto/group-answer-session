@@ -1,184 +1,151 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import usePartySocket from 'partysocket/react';
+import type { QuizState, Question, Participant, Answer } from '../../party/server';
 
-// Types
-export interface Question {
-  id: string;
-  text: string;
-  type: 'single-choice' | 'multi-choice' | 'text-input';
-  options?: string[];
-}
+// The state managed by the server
+type ServerState = QuizState;
 
-export interface Participant {
-  id: string;
-  name: string;
-}
-
-export interface Answer {
-  participantId: string;
-  questionId: string;
-  answers: string[];
-}
-
-export interface QuizState {
-  // Room management
+// The state managed locally on the client
+interface ClientState {
   roomId: string | null;
   isHost: boolean;
-  
-  // Host-specific state
-  questions: Question[];
-  participants: Participant[];
-  currentQuestionIndex: number;
-  isQuizStarted: boolean;
-  isQuizFinished: boolean;
-  answers: Record<string, Record<string, string[]>>;
-  
-  // Participant-specific state
   participantName: string | null;
-  participantId: string | null;
-  currentQuestion: Question | null;
-  hasAnsweredCurrentQuestion: boolean;
+  participantId: string | null; // The client's own connection ID
 }
 
-type QuizAction =
-  | { type: 'CREATE_ROOM'; roomId: string }
-  | { type: 'JOIN_ROOM'; roomId: string; participantName: string; participantId: string }
-  | { type: 'ADD_QUESTION'; question: Question }
-  | { type: 'REMOVE_QUESTION'; questionId: string }
-  | { type: 'UPDATE_QUESTION'; question: Question }
-  | { type: 'ADD_PARTICIPANT'; participant: Participant }
-  | { type: 'START_QUIZ' }
-  | { type: 'NEXT_QUESTION' }
-  | { type: 'FINISH_QUIZ' }
-  | { type: 'SUBMIT_ANSWER'; answer: Answer }
-  | { type: 'SET_CURRENT_QUESTION'; question: Question }
-  | { type: 'RESET_ANSWER_STATUS' }
-  | { type: 'LEAVE_ROOM' };
+// The combined context value
+interface QuizContextValue {
+  serverState: ServerState;
+  clientState: ClientState;
+  setRoom: (roomId: string, isHost: boolean, name?: string) => void;
+  leaveRoom: () => void;
+  send: (message: object) => void;
+  currentQuestion: Question | null;
+  hasAnsweredCurrentQuestion: boolean;
+  setClientState: React.Dispatch<React.SetStateAction<ClientState>>;
+  setServerState: React.Dispatch<React.SetStateAction<ServerState>>;
+}
 
-const initialState: QuizState = {
-  roomId: null,
-  isHost: false,
+const QuizContext = createContext<QuizContextValue | null>(null);
+
+const initialState: ServerState = {
   questions: [],
   participants: [],
-  currentQuestionIndex: 0,
+  currentQuestionIndex: -1,
   isQuizStarted: false,
   isQuizFinished: false,
   answers: {},
-  participantName: null,
-  participantId: null,
-  currentQuestion: null,
-  hasAnsweredCurrentQuestion: false,
 };
 
-function quizReducer(state: QuizState, action: QuizAction): QuizState {
-  switch (action.type) {
-    case 'CREATE_ROOM':
-      return {
-        ...initialState,
-        roomId: action.roomId,
-        isHost: true,
-      };
-
-    case 'JOIN_ROOM':
-      return {
-        ...initialState,
-        roomId: action.roomId,
-        isHost: false,
-        participantName: action.participantName,
-        participantId: action.participantId,
-      };
-
-    case 'ADD_QUESTION':
-      return {
-        ...state,
-        questions: [...state.questions, action.question],
-      };
-
-    case 'REMOVE_QUESTION':
-      return {
-        ...state,
-        questions: state.questions.filter(q => q.id !== action.questionId),
-      };
-
-    case 'UPDATE_QUESTION':
-      return {
-        ...state,
-        questions: state.questions.map(q => 
-          q.id === action.question.id ? action.question : q
-        ),
-      };
-
-    case 'ADD_PARTICIPANT':
-      return {
-        ...state,
-        participants: [...state.participants, action.participant],
-      };
-
-    case 'START_QUIZ':
-      return {
-        ...state,
-        isQuizStarted: true,
-        currentQuestionIndex: 0,
-      };
-
-    case 'NEXT_QUESTION':
-      const nextIndex = state.currentQuestionIndex + 1;
-      return {
-        ...state,
-        currentQuestionIndex: nextIndex,
-        hasAnsweredCurrentQuestion: false,
-      };
-
-    case 'FINISH_QUIZ':
-      return {
-        ...state,
-        isQuizFinished: true,
-      };
-
-    case 'SUBMIT_ANSWER':
-      const { participantId, questionId, answers } = action.answer;
-      return {
-        ...state,
-        answers: {
-          ...state.answers,
-          [questionId]: {
-            ...state.answers[questionId],
-            [participantId]: answers,
-          },
-        },
-        hasAnsweredCurrentQuestion: state.participantId === participantId,
-      };
-
-    case 'SET_CURRENT_QUESTION':
-      return {
-        ...state,
-        currentQuestion: action.question,
-        hasAnsweredCurrentQuestion: false,
-      };
-
-    case 'RESET_ANSWER_STATUS':
-      return {
-        ...state,
-        hasAnsweredCurrentQuestion: false,
-      };
-
-    case 'LEAVE_ROOM':
-      return initialState;
-
-    default:
-      return state;
-  }
-}
-
-const QuizContext = createContext<{
-  state: QuizState;
-  dispatch: React.Dispatch<QuizAction>;
-} | null>(null);
-
 export function QuizProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(quizReducer, initialState);
+  const [clientState, setClientState] = useState<ClientState>({
+    roomId: null,
+    isHost: false,
+    participantName: null,
+    participantId: null,
+  });
+
+  const [serverState, setServerState] = useState<ServerState>(initialState);
+
+  const socket = usePartySocket({
+    host: import.meta.env.VITE_PARTYKIT_HOST,
+    room: clientState.roomId || 'placeholder',
+    onOpen: (e) => {
+      // Only proceed if we have a real room ID
+      if (!clientState.roomId) return;
+      
+      console.log('Socket connected, event:', e);
+      
+      // Identify self to the server first, the server will use sender.id as participant ID
+      const identifyMessage = { 
+        type: 'identify', 
+        name: clientState.participantName, 
+        isHost: clientState.isHost 
+      };
+      console.log('Sending identify message:', identifyMessage);
+      socket.send(JSON.stringify(identifyMessage));
+    },
+    onMessage: (event) => {
+      console.log('Received message:', event.data);
+      const message = JSON.parse(event.data);
+      if (message.type === 'sync') {
+        console.log('Syncing state:', message.state);
+        setServerState(message.state);
+        
+        // Update participantId based on server state if we're a participant
+        if (!clientState.isHost && clientState.participantName && !clientState.participantId) {
+          const participant = message.state.participants.find((p: Participant) => p.name === clientState.participantName);
+          if (participant) {
+            console.log('Found participant in server state:', participant.id);
+            setClientState(s => ({ ...s, participantId: participant.id }));
+          }
+        }
+      }
+      if (message.type === 'error') {
+        // You might want to use a toast notification here
+        console.error('Server Error:', message.message);
+      }
+      if (message.type === 'hostDisconnected') {
+        console.log('Host disconnected. The quiz may be reset.');
+        // Optionally, reset client state or show a message
+      }
+    },
+    onError: (error) => {
+      console.error('Socket error:', error);
+    },
+    onClose: (event) => {
+      console.log('Socket closed:', event);
+    }
+  });
+
+  const setRoom = useCallback((roomId: string, isHost: boolean, name?: string) => {
+    setClientState({ roomId, isHost, participantName: name || null, participantId: null });
+  }, []);
+
+  const leaveRoom = useCallback(() => {
+    setClientState({ roomId: null, isHost: false, participantName: null, participantId: null });
+    setServerState(initialState); // Reset local state on leave
+  }, []);
+
+  const send = useCallback((message: object) => {
+    socket.send(JSON.stringify(message));
+  }, [socket]);
+
+  const currentQuestion =
+    serverState.isQuizStarted && serverState.currentQuestionIndex >= 0
+      ? serverState.questions[serverState.currentQuestionIndex]
+      : null;
+
+  const hasAnsweredCurrentQuestion =
+    !!currentQuestion &&
+    !!clientState.participantId &&
+    !!serverState.answers[currentQuestion.id]?.[clientState.participantId];
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Debug - hasAnsweredCurrentQuestion calculation:', {
+      currentQuestion: !!currentQuestion,
+      currentQuestionId: currentQuestion?.id,
+      participantId: clientState.participantId,
+      answers: serverState.answers,
+      hasAnswered: hasAnsweredCurrentQuestion
+    });
+  }, [hasAnsweredCurrentQuestion, currentQuestion, clientState.participantId, serverState.answers]);
+
+  const value = {
+    serverState,
+    clientState,
+    setRoom,
+    leaveRoom,
+    send,
+    currentQuestion,
+    hasAnsweredCurrentQuestion,
+    setClientState,
+    setServerState,
+  };
 
   return (
-    <QuizContext.Provider value={{ state, dispatch }}>
+    <QuizContext.Provider value={value}>
       {children}
     </QuizContext.Provider>
   );
@@ -197,10 +164,9 @@ export function generateRoomId(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-export function generateParticipantId(): string {
-  return Math.random().toString(36).substring(2, 15);
-}
-
 export function generateQuestionId(): string {
   return `q_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`;
 }
+
+// Re-export types for convenience in other components
+export type { Question, Participant, Answer };

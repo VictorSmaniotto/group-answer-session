@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { QuizProvider, useQuiz } from './contexts/QuizContext';
+import { useToast } from './components/Toast';
 import HomePage from './components/HomePage';
 import HostRoom from './components/HostRoom';
 import ParticipantRoom from './components/ParticipantRoom';
@@ -11,30 +12,34 @@ import ParticipantRoom from './components/ParticipantRoom';
 const queryClient = new QueryClient();
 
 function QuizApp() {
-  const { state, dispatch } = useQuiz();
-
-  const handleCreateRoom = () => {
-    // Room creation is handled in HomePage
-  };
-
-  const handleJoinRoom = () => {
-    // Room joining is handled in HomePage
-  };
-
-  const handleLeaveRoom = () => {
-    dispatch({ type: 'LEAVE_ROOM' });
-  };
+  const { clientState, leaveRoom } = useQuiz();
+  const { ToastContainer } = useToast();
 
   // Route logic based on quiz state
-  if (!state.roomId) {
-    return <HomePage onCreateRoom={handleCreateRoom} onJoinRoom={handleJoinRoom} />;
+  if (!clientState.roomId) {
+    return (
+      <>
+        <HomePage />
+        <ToastContainer />
+      </>
+    );
   }
 
-  if (state.isHost) {
-    return <HostRoom onLeaveRoom={handleLeaveRoom} />;
+  if (clientState.isHost) {
+    return (
+      <>
+        <HostRoom />
+        <ToastContainer />
+      </>
+    );
   }
 
-  return <ParticipantRoom onLeaveRoom={handleLeaveRoom} />;
+  return (
+    <>
+      <ParticipantRoom />
+      <ToastContainer />
+    </>
+  );
 }
 
 const App = () => (

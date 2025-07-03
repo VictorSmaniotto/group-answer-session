@@ -1,35 +1,27 @@
 import React from 'react';
 import { useQuiz } from '../contexts/QuizContext';
+import ExportModal from './ExportModal';
 
 export default function QuizController() {
-  const { state, dispatch } = useQuiz();
+  const { serverState, send, leaveRoom } = useQuiz();
 
   const handleStartQuiz = () => {
-    dispatch({ type: 'START_QUIZ' });
-    if (state.questions.length > 0) {
-      dispatch({ type: 'SET_CURRENT_QUESTION', question: state.questions[0] });
-    }
+    send({ type: 'startQuiz' });
   };
 
   const handleNextQuestion = () => {
-    const nextIndex = state.currentQuestionIndex + 1;
-    if (nextIndex < state.questions.length) {
-      dispatch({ type: 'NEXT_QUESTION' });
-      dispatch({ type: 'SET_CURRENT_QUESTION', question: state.questions[nextIndex] });
-    } else {
-      handleFinishQuiz();
-    }
+    send({ type: 'nextQuestion' });
   };
 
   const handleFinishQuiz = () => {
-    dispatch({ type: 'FINISH_QUIZ' });
+    send({ type: 'finishQuiz' });
   };
 
-  const currentQuestion = state.questions[state.currentQuestionIndex];
-  const isLastQuestion = state.currentQuestionIndex === state.questions.length - 1;
-  const canStartQuiz = state.questions.length > 0 && state.participants.length > 0;
+  const currentQuestion = serverState.questions[serverState.currentQuestionIndex];
+  const isLastQuestion = serverState.currentQuestionIndex === serverState.questions.length - 1;
+  const canStartQuiz = serverState.questions.length > 0 && serverState.participants.length > 0;
 
-  if (!state.isQuizStarted && !state.isQuizFinished) {
+  if (!serverState.isQuizStarted && !serverState.isQuizFinished) {
     return (
       <div className="card-modern animate-scale-in">
         <h2 className="text-2xl font-bold mb-6">
@@ -40,19 +32,19 @@ export default function QuizController() {
           <div className="grid grid-cols-2 gap-6">
             <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-6 rounded-2xl border border-primary/20">
               <span className="text-muted-foreground font-medium">Perguntas:</span>
-              <p className="font-bold text-3xl text-primary">{state.questions.length}</p>
+              <p className="font-bold text-3xl text-primary">{serverState.questions.length}</p>
             </div>
             <div className="bg-gradient-to-r from-secondary/10 to-accent/10 p-6 rounded-2xl border border-secondary/20">
               <span className="text-muted-foreground font-medium">Participantes:</span>
-              <p className="font-bold text-3xl text-secondary">{state.participants.length}</p>
+              <p className="font-bold text-3xl text-secondary">{serverState.participants.length}</p>
             </div>
           </div>
 
           {!canStartQuiz && (
             <div className="bg-warning/10 border-2 border-warning/20 rounded-2xl p-6">
               <p className="text-warning-foreground font-semibold text-lg">
-                {state.questions.length === 0 && 'Adicione pelo menos uma pergunta. '}
-                {state.participants.length === 0 && 'Aguardando participantes entrarem na sala.'}
+                {serverState.questions.length === 0 && 'Adicione pelo menos uma pergunta. '}
+                {serverState.participants.length === 0 && 'Aguardando participantes entrarem na sala.'}
               </p>
             </div>
           )}
@@ -69,7 +61,7 @@ export default function QuizController() {
     );
   }
 
-  if (state.isQuizFinished) {
+  if (serverState.isQuizFinished) {
     return (
       <div className="card-modern text-center animate-bounce-soft">
         <div className="w-24 h-24 bg-gradient-to-r from-success to-accent rounded-full mx-auto mb-6 flex items-center justify-center">
@@ -83,11 +75,13 @@ export default function QuizController() {
         </p>
         
         <div className="space-y-4">
-          <button className="btn-primary w-full text-lg py-4">
-            <span className="font-semibold">Exportar Resultados</span>
-          </button>
+          <ExportModal>
+            <button className="btn-primary w-full text-lg py-4">
+              <span className="font-semibold">Exportar Resultados</span>
+            </button>
+          </ExportModal>
           <button
-            onClick={() => dispatch({ type: 'LEAVE_ROOM' })}
+            onClick={leaveRoom}
             className="btn-outline w-full text-lg py-4"
           >
             Criar Nova Sala
@@ -107,7 +101,7 @@ export default function QuizController() {
         <div className="bg-gradient-to-r from-primary/5 to-accent/5 border-2 border-primary/20 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
             <span className="text-lg font-bold text-primary">
-              Pergunta {state.currentQuestionIndex + 1} de {state.questions.length}
+              Pergunta {serverState.currentQuestionIndex + 1} de {serverState.questions.length}
             </span>
             <div className="text-sm bg-gradient-to-r from-primary to-accent text-white px-3 py-1 rounded-xl font-bold">
               {currentQuestion?.type === 'single-choice' ? 'Única' : 
@@ -129,7 +123,7 @@ export default function QuizController() {
 
         <div className="flex gap-4">
           <button
-            onClick={handleNextQuestion}
+            onClick={isLastQuestion ? handleFinishQuiz : handleNextQuestion}
             className="btn-primary flex-1 text-lg py-4"
           >
             <span className="font-semibold">

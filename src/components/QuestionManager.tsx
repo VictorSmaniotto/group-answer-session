@@ -2,10 +2,10 @@ import React from 'react';
 import { useQuiz } from '../contexts/QuizContext';
 
 export default function QuestionManager() {
-  const { state, dispatch } = useQuiz();
+  const { serverState, send } = useQuiz();
 
   const handleRemoveQuestion = (questionId: string) => {
-    dispatch({ type: 'REMOVE_QUESTION', questionId });
+    send({ type: 'removeQuestion', questionId });
   };
 
   const getQuestionTypeLabel = (type: string) => {
@@ -21,7 +21,7 @@ export default function QuestionManager() {
     }
   };
 
-  if (state.questions.length === 0) {
+  if (serverState.questions.length === 0) {
     return (
       <div className="card-modern text-center animate-scale-in">
         <div className="w-20 h-20 bg-gradient-to-r from-muted to-muted-foreground/20 rounded-3xl mx-auto mb-6 flex items-center justify-center">
@@ -41,11 +41,11 @@ export default function QuestionManager() {
     <div className="card-modern animate-scale-in">
       <h2 className="text-2xl font-bold mb-6">
         <span className="text-gradient-primary">Perguntas</span>{' '}
-        <span className="text-muted-foreground">({state.questions.length})</span>
+        <span className="text-muted-foreground">({serverState.questions.length})</span>
       </h2>
       
       <div className="space-y-4">
-        {state.questions.map((question, index) => (
+        {serverState.questions.map((question, index) => (
           <div key={question.id} className="border-2 border-border rounded-2xl p-6 bg-card/50 transition-[var(--transition-normal)] hover:border-primary/50">
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1">
@@ -71,7 +71,7 @@ export default function QuestionManager() {
                 )}
               </div>
               
-              {!state.isQuizStarted && (
+              {!serverState.isQuizStarted && (
                 <button
                   onClick={() => handleRemoveQuestion(question.id)}
                   className="text-destructive hover:bg-destructive/10 p-3 rounded-xl transition-[var(--transition-fast)] font-bold text-lg"

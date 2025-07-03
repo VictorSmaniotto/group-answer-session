@@ -1,34 +1,23 @@
 import React, { useState } from 'react';
-import { useQuiz, generateRoomId, generateParticipantId } from '../contexts/QuizContext';
+import { useQuiz, generateRoomId } from '../contexts/QuizContext';
 import { Input } from './ui/input';
 
-interface HomePageProps {
-  onCreateRoom: () => void;
-  onJoinRoom: () => void;
-}
-
-export default function HomePage({ onCreateRoom, onJoinRoom }: HomePageProps) {
-  const { dispatch } = useQuiz();
+export default function HomePage() {
+  const { setRoom } = useQuiz();
   const [joinCode, setJoinCode] = useState('');
   const [participantName, setParticipantName] = useState('');
   const [showJoinForm, setShowJoinForm] = useState(false);
 
   const handleCreateRoom = () => {
-    const roomId = generateRoomId();
-    dispatch({ type: 'CREATE_ROOM', roomId });
-    onCreateRoom();
+    const newRoomId = generateRoomId();
+    // Set the room details in the context. The user is the host.
+    setRoom(newRoomId, true);
   };
 
   const handleJoinRoom = () => {
     if (joinCode.trim() && participantName.trim()) {
-      const participantId = generateParticipantId();
-      dispatch({ 
-        type: 'JOIN_ROOM', 
-        roomId: joinCode.trim().toUpperCase(), 
-        participantName: participantName.trim(),
-        participantId 
-      });
-      onJoinRoom();
+      // Set the room details in the context. The user is a participant.
+      setRoom(joinCode.trim().toUpperCase(), false, participantName.trim());
     }
   };
 

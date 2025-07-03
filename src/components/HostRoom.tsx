@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuiz, Question, generateQuestionId } from '../contexts/QuizContext';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -7,35 +7,15 @@ import QuestionManager from './QuestionManager';
 import ParticipantsList from './ParticipantsList';
 import QuizController from './QuizController';
 import ResultsDisplay from './ResultsDisplay';
+import ExportModal from './ExportModal';
 
-interface HostRoomProps {
-  onLeaveRoom: () => void;
-}
-
-export default function HostRoom({ onLeaveRoom }: HostRoomProps) {
-  const { state, dispatch } = useQuiz();
+export default function HostRoom() {
+  const { serverState, clientState, send, leaveRoom } = useQuiz();
   const [newQuestion, setNewQuestion] = useState<Partial<Question>>({
     text: '',
     type: 'single-choice',
     options: ['', '']
   });
-
-  // Simulate participants joining (for demo purposes)
-  useEffect(() => {
-    const demoParticipants = [
-      { id: 'demo1', name: 'Ana Costa' },
-      { id: 'demo2', name: 'Carlos Silva' },
-      { id: 'demo3', name: 'Marina Santos' }
-    ];
-
-    const timer = setTimeout(() => {
-      demoParticipants.forEach(participant => {
-        dispatch({ type: 'ADD_PARTICIPANT', participant });
-      });
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [dispatch]);
 
   const handleAddQuestion = () => {
     if (newQuestion.text?.trim()) {
@@ -48,7 +28,7 @@ export default function HostRoom({ onLeaveRoom }: HostRoomProps) {
           : undefined
       };
 
-      dispatch({ type: 'ADD_QUESTION', question });
+      send({ type: 'addQuestion', question });
       setNewQuestion({
         text: '',
         type: 'single-choice',
@@ -86,7 +66,7 @@ export default function HostRoom({ onLeaveRoom }: HostRoomProps) {
     }
   };
 
-  const canStartQuiz = state.questions.length > 0 && state.participants.length > 0;
+  const canStartQuiz = serverState.questions.length > 0 && serverState.participants.length > 0;
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -100,25 +80,36 @@ export default function HostRoom({ onLeaveRoom }: HostRoomProps) {
             </h1>
             <div className="flex items-center gap-6">
               <div className="bg-gradient-to-r from-primary to-accent text-white px-6 py-3 rounded-2xl font-mono text-2xl font-bold tracking-wider">
-                {state.roomId}
+                {clientState.roomId}
               </div>
               <span className="text-muted-foreground text-lg">Código da sala</span>
             </div>
           </div>
           
-          <button
-            onClick={onLeaveRoom}
-            className="btn-outline text-lg px-6 py-3"
-          >
-            Sair da Sala
-          </button>
+          <div className="flex gap-3">
+            {/* Export Button - Only show if quiz has started or finished */}
+            {(serverState.isQuizStarted || serverState.isQuizFinished) && (
+              <ExportModal>
+                <button className="btn-secondary text-lg px-6 py-3">
+                  📊 Exportar
+                </button>
+              </ExportModal>
+            )}
+            
+            <button
+              onClick={leaveRoom}
+              className="btn-outline text-lg px-6 py-3"
+            >
+              Sair da Sala
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Question Management */}
           <div className="lg:col-span-2 space-y-8">
             {/* Create New Question */}
-            {!state.isQuizStarted && (
+            {!serverState.isQuizStarted && (
               <div className="card-modern animate-scale-in">
                 <h2 className="text-2xl font-bold mb-6">
                   <span className="text-gradient-secondary">Nova Pergunta</span>
@@ -213,10 +204,10 @@ export default function HostRoom({ onLeaveRoom }: HostRoomProps) {
             <QuestionManager />
 
             {/* Quiz Controller */}
-            {(state.isQuizStarted || canStartQuiz) && <QuizController />}
+            {(serverState.isQuizStarted || canStartQuiz) && <QuizController />}
 
             {/* Results Display */}
-            {state.isQuizStarted && <ResultsDisplay />}
+            {serverState.isQuizStarted && <ResultsDisplay />}
           </div>
 
           {/* Right Column - Participants */}

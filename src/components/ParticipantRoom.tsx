@@ -2,41 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { useQuiz } from '../contexts/QuizContext';
 import { Textarea } from './ui/textarea';
 
-interface ParticipantRoomProps {
-  onLeaveRoom: () => void;
-}
-
-export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
-  const { state, dispatch } = useQuiz();
+export default function ParticipantRoom() {
+  const { 
+    serverState, 
+    clientState, 
+    send, 
+    leaveRoom, 
+    currentQuestion, 
+    hasAnsweredCurrentQuestion 
+  } = useQuiz();
+  
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   const [textAnswer, setTextAnswer] = useState('');
 
-  // Simulate receiving questions from host
+  // Reset local answer state when a new question arrives
   useEffect(() => {
-    const simulateQuestionReceived = () => {
-      if (state.roomId && !state.currentQuestion) {
-        const demoQuestion = {
-          id: 'demo1',
-          text: 'Como você avalia nossa comunicação interna?',
-          type: 'single-choice' as const,
-          options: ['Excelente', 'Boa', 'Regular', 'Precisa melhorar']
-        };
-        
-        setTimeout(() => {
-          dispatch({ type: 'SET_CURRENT_QUESTION', question: demoQuestion });
-        }, 3000);
-      }
-    };
-
-    simulateQuestionReceived();
-  }, [state.roomId, state.currentQuestion, dispatch]);
+    setSelectedAnswers([]);
+    setTextAnswer('');
+  }, [currentQuestion]);
 
   const handleOptionSelect = (option: string) => {
-    if (!state.currentQuestion) return;
+    if (!currentQuestion) return;
 
-    if (state.currentQuestion.type === 'single-choice') {
+    if (currentQuestion.type === 'single-choice') {
       setSelectedAnswers([option]);
-    } else if (state.currentQuestion.type === 'multi-choice') {
+    } else if (currentQuestion.type === 'multi-choice') {
       setSelectedAnswers(prev => 
         prev.includes(option) 
           ? prev.filter(a => a !== option)
@@ -46,34 +36,35 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
   };
 
   const handleSubmitAnswer = () => {
-    if (!state.currentQuestion || !state.participantId) return;
+    if (!currentQuestion) return;
 
-    const answers = state.currentQuestion.type === 'text-input' 
+    const answers = currentQuestion.type === 'text-input' 
       ? [textAnswer.trim()]
       : selectedAnswers;
 
-    if (answers.length === 0 || (state.currentQuestion.type === 'text-input' && !textAnswer.trim())) {
+    if (answers.length === 0 || (currentQuestion.type === 'text-input' && !textAnswer.trim())) {
       return;
     }
 
-    dispatch({
-      type: 'SUBMIT_ANSWER',
+    console.log('Submitting answer:', {
+      questionId: currentQuestion.id,
+      answers
+    });
+
+    send({
+      type: 'submitAnswer',
       answer: {
-        participantId: state.participantId,
-        questionId: state.currentQuestion.id,
+        questionId: currentQuestion.id,
         answers
       }
     });
-
-    setSelectedAnswers([]);
-    setTextAnswer('');
   };
 
-  const isAnswerSelected = state.currentQuestion?.type === 'text-input' 
+  const isAnswerSelected = currentQuestion?.type === 'text-input' 
     ? textAnswer.trim().length > 0
     : selectedAnswers.length > 0;
 
-  if (state.isQuizFinished) {
+  if (serverState.isQuizFinished) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center animate-bounce-soft">
@@ -87,7 +78,7 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
             Obrigado por participar! Suas respostas foram registradas.
           </p>
           <button
-            onClick={onLeaveRoom}
+            onClick={leaveRoom}
             className="btn-primary text-lg py-4 px-8"
           >
             Voltar ao Início
@@ -104,13 +95,13 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
         <div className="flex justify-between items-center mb-8 animate-fade-in">
           <div>
             <h1 className="text-3xl font-bold mb-2">
-              <span className="text-gradient-primary">Olá, {state.participantName}!</span>
+              <span className="text-gradient-primary">Olá, {clientState.participantName}!</span>
             </h1>
-            <p className="text-muted-foreground text-lg">Sala: <span className="font-mono font-bold">{state.roomId}</span></p>
+            <p className="text-muted-foreground text-lg">Sala: <span className="font-mono font-bold">{clientState.roomId}</span></p>
           </div>
           
           <button
-            onClick={onLeaveRoom}
+            onClick={leaveRoom}
             className="btn-outline px-4 py-2"
           >
             Sair
@@ -119,7 +110,7 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
 
         {/* Content */}
         <div className="card-modern animate-scale-in">
-          {!state.currentQuestion && !state.hasAnsweredCurrentQuestion ? (
+          {!serverState.isQuizStarted || (!currentQuestion && !hasAnsweredCurrentQuestion) ? (
             // Waiting for quiz to start
             <div className="text-center py-16">
               <div className="w-20 h-20 bg-gradient-to-r from-warning to-accent rounded-full mx-auto mb-8 flex items-center justify-center animate-pulse">
@@ -132,7 +123,7 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
                 O anfitrião está preparando as perguntas
               </p>
             </div>
-          ) : state.hasAnsweredCurrentQuestion ? (
+          ) : hasAnsweredCurrentQuestion ? (
             // Answer submitted, waiting for next question
             <div className="text-center py-16">
               <div className="w-20 h-20 bg-gradient-to-r from-success to-accent rounded-full mx-auto mb-8 flex items-center justify-center">
@@ -145,14 +136,14 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
                 Aguardando a próxima pergunta...
               </p>
             </div>
-          ) : state.currentQuestion ? (
+          ) : currentQuestion ? (
             // Active question
             <div className="animate-slide-up">
               <h2 className="text-2xl font-bold mb-8 text-center text-foreground">
-                {state.currentQuestion.text}
+                {currentQuestion.text}
               </h2>
 
-              {state.currentQuestion.type === 'text-input' ? (
+              {currentQuestion.type === 'text-input' ? (
                 // Text input
                 <div className="space-y-6">
                   <Textarea
@@ -174,7 +165,7 @@ export default function ParticipantRoom({ onLeaveRoom }: ParticipantRoomProps) {
               ) : (
                 // Multiple choice
                 <div className="space-y-4">
-                  {state.currentQuestion.options?.map((option, index) => (
+                  {currentQuestion.options?.map((option, index) => (
                     <button
                       key={index}
                       onClick={() => handleOptionSelect(option)}
