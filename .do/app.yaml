@@ -1,0 +1,39 @@
+name: quiz-interativo
+region: nyc
+services:
+- name: web
+  source_dir: /
+  github:
+    repo: VictorSmaniotto/quiz-interativo
+    branch: main
+  run_command: npm start
+  environment_slug: node-js
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  http_port: 3000
+  routes:
+  - path: /
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: VITE_PARTYKIT_HOST
+    value: quiz-interativo.victorsmaniotto.partykit.dev
+  health_check:
+    http_path: /health
+static_sites:
+- name: frontend
+  source_dir: /
+  github:
+    repo: VictorSmaniotto/quiz-interativo
+    branch: main
+  build_command: npm run build
+  output_dir: /dist
+  index_document: index.html
+  error_document: index.html
+  routes:
+  - path: /
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: VITE_PARTYKIT_HOST
+    value: quiz-interativo.victorsmaniotto.partykit.dev
