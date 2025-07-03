@@ -43,6 +43,40 @@ type QuizMessage =
   | { type: 'submitAnswer'; answer: Answer }
   | { type: 'resetQuiz' };
 
+function isQuizMessage(msg: any): msg is QuizMessage {
+  if (!msg || typeof msg !== 'object' || typeof msg.type !== 'string') {
+    return false;
+  }
+
+  switch (msg.type) {
+    case 'identify':
+      return (
+        typeof msg.name === 'string' &&
+        typeof msg.isHost === 'boolean'
+      );
+    case 'addQuestion':
+      return typeof msg.question === 'object' && typeof msg.question.id === 'string';
+    case 'removeQuestion':
+      return typeof msg.questionId === 'string';
+    case 'updateQuestion':
+      return typeof msg.question === 'object' && typeof msg.question.id === 'string';
+    case 'startQuiz':
+    case 'nextQuestion':
+    case 'finishQuiz':
+    case 'resetQuiz':
+      return true;
+    case 'submitAnswer':
+      return (
+        msg.answer &&
+        typeof msg.answer === 'object' &&
+        typeof msg.answer.questionId === 'string' &&
+        Array.isArray(msg.answer.answers)
+      );
+    default:
+      return false;
+  }
+}
+
 export default class QuizServer implements Party.Server {
   state: QuizState;
   hostId: string | null = null;
@@ -66,7 +100,18 @@ export default class QuizServer implements Party.Server {
 
   // This is called every time a user sends a message to the room
   async onMessage(message: string, sender: Party.Connection) {
-    const msg = JSON.parse(message) as QuizMessage;
+    let msg: QuizMessage;
+    try {
+      msg = JSON.parse(message);
+    } catch {
+      sender.send(JSON.stringify({ type: 'error', message: 'Invalid message' }));
+      return;
+    }
+
+    if (!isQuizMessage(msg)) {
+      sender.send(JSON.stringify({ type: 'error', message: 'Invalid message' }));
+      return;
+    }
 
     console.log(`Received message from ${sender.id}:`, msg);
 
