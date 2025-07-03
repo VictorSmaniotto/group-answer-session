@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuiz } from '../contexts/QuizContext';
+import { getParticipantColor } from '../utils/participantColors';
 
 // Simple chart components without recharts dependency
 const SimpleBarChart = ({ data, colors }: { data: any[], colors: string[] }) => {
@@ -69,13 +70,17 @@ export default function ResultsDisplay() {
   };
 
   const chartData = getChartData();
-  const colors = [
-    'hsl(var(--primary))', 
-    'hsl(var(--secondary))', 
-    'hsl(var(--accent))', 
-    'hsl(var(--success))', 
-    'hsl(var(--warning))', 
-    'hsl(var(--destructive))'
+  const optionColors = [
+    '#10b981', // emerald-500 
+    '#059669', // emerald-600
+    '#047857', // emerald-700
+    '#065f46', // emerald-800
+    '#22c55e', // green-500
+    '#16a34a', // green-600
+    '#15803d', // green-700
+    '#166534', // green-800
+    '#84cc16', // lime-500
+    '#65a30d', // lime-600
   ];
 
   // Get text answers for text-input questions
@@ -85,6 +90,7 @@ export default function ResultsDisplay() {
     return Object.entries(currentAnswers).map(([participantId, answers]) => {
       const participant = serverState.participants.find(p => p.id === participantId);
       return {
+        participantId,
         participantName: participant?.name || 'Anônimo',
         answer: answers[0] || ''
       };
@@ -124,7 +130,7 @@ export default function ResultsDisplay() {
       {currentQuestion.type === 'text-input' ? (
         // Text answers display
         <div>
-          <h3 className="text-xl font-bold mb-4 text-gradient-secondary">Respostas de Texto</h3>
+          <h3 className="text-xl font-bold mb-4 text-foreground">Respostas de Texto</h3>
           {textAnswers.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <div className="w-16 h-16 bg-gradient-to-r from-muted to-muted-foreground/20 rounded-full mx-auto mb-4 flex items-center justify-center">
@@ -134,24 +140,30 @@ export default function ResultsDisplay() {
             </div>
           ) : (
             <div className="space-y-4 max-h-80 overflow-y-auto">
-              {textAnswers.map((item, index) => (
-                <div key={index} className="bg-card/50 border border-border rounded-2xl p-4 animate-fade-in">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-xl flex items-center justify-center text-white font-bold">
-                      {item.participantName.charAt(0).toUpperCase()}
+              {textAnswers.map((item, index) => {
+                const color = getParticipantColor(item.participantId);
+                return (
+                  <div key={index} className={`border rounded-2xl p-4 animate-fade-in ${color.light} ${color.border} border-opacity-50`}>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${color.bg} ${color.text}`}>
+                        {item.participantName.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="font-semibold text-lg">{item.participantName}</span>
+                      <div className={`px-2 py-1 rounded-full text-xs font-semibold ${color.bg} ${color.text} opacity-75 ml-auto`}>
+                        {color.name}
+                      </div>
                     </div>
-                    <span className="font-semibold text-lg">{item.participantName}</span>
+                    <p className="text-foreground pl-13">{item.answer}</p>
                   </div>
-                  <p className="text-foreground pl-13">{item.answer}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
       ) : (
         // Chart display for multiple choice
         <div>
-          <h3 className="text-xl font-bold mb-4 text-gradient-secondary">Distribuição das Respostas</h3>
+          <h3 className="text-xl font-bold mb-4 text-foreground">Distribuição das Respostas</h3>
           {chartData.length === 0 || chartData.every(item => item.count === 0) ? (
             <div className="text-center py-12 text-muted-foreground">
               <div className="w-16 h-16 bg-gradient-to-r from-muted to-muted-foreground/20 rounded-full mx-auto mb-4 flex items-center justify-center">
@@ -163,7 +175,7 @@ export default function ResultsDisplay() {
             <div className="space-y-6">
               {/* Simple Bar Chart */}
               <div className="bg-card/50 border border-border rounded-2xl p-6">
-                <SimpleBarChart data={chartData} colors={colors} />
+                <SimpleBarChart data={chartData} colors={optionColors} />
               </div>
 
               {/* Options Summary */}
@@ -173,7 +185,7 @@ export default function ResultsDisplay() {
                     <div className="flex items-center gap-4">
                       <div 
                         className="w-6 h-6 rounded-xl"
-                        style={{ backgroundColor: colors[index % colors.length] }}
+                        style={{ backgroundColor: optionColors[index % optionColors.length] }}
                       />
                       <span className="font-bold text-lg">{item.name}.</span>
                       <span className="text-foreground">{item.fullName}</span>

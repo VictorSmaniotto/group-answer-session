@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuiz } from '../contexts/QuizContext';
 import { Textarea } from './ui/textarea';
+import { getParticipantColor } from '../utils/participantColors';
 
 export default function ParticipantRoom() {
   const { 
@@ -13,25 +14,44 @@ export default function ParticipantRoom() {
   } = useQuiz();
   
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
+  const [selectedOptionIndexes, setSelectedOptionIndexes] = useState<number[]>([]);
   const [textAnswer, setTextAnswer] = useState('');
 
   // Reset local answer state when a new question arrives
   useEffect(() => {
     setSelectedAnswers([]);
+    setSelectedOptionIndexes([]);
     setTextAnswer('');
   }, [currentQuestion]);
 
-  const handleOptionSelect = (option: string) => {
+  const handleOptionSelect = (option: string, index: number) => {
     if (!currentQuestion) return;
 
+    const trimmedOption = option.trim();
+    console.log('Selecting option:', trimmedOption, 'at index:', index);
+    console.log('Current question type:', currentQuestion.type);
+    console.log('Current selected indexes:', selectedOptionIndexes);
+
     if (currentQuestion.type === 'single-choice') {
-      setSelectedAnswers([option]);
+      setSelectedAnswers([trimmedOption]);
+      setSelectedOptionIndexes([index]);
     } else if (currentQuestion.type === 'multi-choice') {
-      setSelectedAnswers(prev => 
-        prev.includes(option) 
-          ? prev.filter(a => a !== option)
-          : [...prev, option]
-      );
+      if (selectedOptionIndexes.includes(index)) {
+        // Deselect this option
+        setSelectedOptionIndexes(prev => prev.filter(i => i !== index));
+        setSelectedAnswers(prev => {
+          const newAnswers = [...prev];
+          const optionIndex = newAnswers.findIndex(a => a === trimmedOption);
+          if (optionIndex > -1) {
+            newAnswers.splice(optionIndex, 1);
+          }
+          return newAnswers;
+        });
+      } else {
+        // Select this option
+        setSelectedOptionIndexes(prev => [...prev, index]);
+        setSelectedAnswers(prev => [...prev, trimmedOption]);
+      }
     }
   };
 
@@ -62,7 +82,7 @@ export default function ParticipantRoom() {
 
   const isAnswerSelected = currentQuestion?.type === 'text-input' 
     ? textAnswer.trim().length > 0
-    : selectedAnswers.length > 0;
+    : selectedOptionIndexes.length > 0;
 
   if (serverState.isQuizFinished) {
     return (
@@ -93,11 +113,18 @@ export default function ParticipantRoom() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8 animate-fade-in">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">
-              <span className="text-gradient-primary">Olá, {clientState.participantName}!</span>
-            </h1>
-            <p className="text-muted-foreground text-lg">Sala: <span className="font-mono font-bold">{clientState.roomId}</span></p>
+          <div className="flex items-center gap-4">
+            {clientState.participantId && (
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-xl ${getParticipantColor(clientState.participantId).bg} ${getParticipantColor(clientState.participantId).text}`}>
+                {clientState.participantName?.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                <span className="text-gradient-primary">Olá, {clientState.participantName}!</span>
+              </h1>
+              <p className="text-muted-foreground text-lg">Sala: <span className="font-mono font-bold">{clientState.roomId}</span></p>
+            </div>
           </div>
           
           <button
@@ -165,28 +192,32 @@ export default function ParticipantRoom() {
               ) : (
                 // Multiple choice
                 <div className="space-y-4">
-                  {currentQuestion.options?.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleOptionSelect(option)}
-                      className={`option-card w-full ${
-                        selectedAnswers.includes(option) ? 'option-card-selected' : ''
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-[var(--transition-fast)] ${
-                          selectedAnswers.includes(option) 
-                            ? 'border-primary bg-primary' 
-                            : 'border-border'
-                        }`}>
-                          {selectedAnswers.includes(option) && (
-                            <div className="w-3 h-3 bg-white rounded-full"></div>
-                          )}
+                  {currentQuestion.options?.map((option, index) => {
+                    const trimmedOption = option.trim();
+                    const isSelected = selectedOptionIndexes.includes(index);
+                    return (
+                      <button
+                        key={`${currentQuestion.id}-option-${index}`}
+                        onClick={() => handleOptionSelect(option, index)}
+                        className={`option-card w-full ${
+                          isSelected ? 'option-card-selected' : ''
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-[var(--transition-fast)] ${
+                            isSelected 
+                              ? 'border-primary bg-primary' 
+                              : 'border-border'
+                          }`}>
+                            {isSelected && (
+                              <div className="w-3 h-3 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                          <span className="flex-1 text-lg font-medium">{trimmedOption}</span>
                         </div>
-                        <span className="flex-1 text-lg font-medium">{option}</span>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                   
                   {isAnswerSelected && (
                     <button

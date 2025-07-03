@@ -93,8 +93,8 @@ export default function QuizController() {
 
   return (
     <div className="card-modern animate-scale-in">
-      <h2 className="text-2xl font-bold mb-6">
-        <span className="text-gradient-secondary">Pergunta Atual</span>
+      <h2 className="text-2xl font-bold mb-6 text-foreground">
+        Pergunta Atual
       </h2>
       
       <div className="space-y-6">

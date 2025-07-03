@@ -26,9 +26,6 @@ export default function HomePage() {
       <div className="max-w-lg w-full">
         {/* Hero Section */}
         <div className="text-center mb-12 animate-fade-in">
-          <div className="w-20 h-20 bg-gradient-to-r from-primary to-accent rounded-3xl mx-auto mb-8 flex items-center justify-center">
-            <span className="text-white text-3xl font-bold">Q</span>
-          </div>
           <h1 className="text-5xl font-bold mb-4">
             <span className="text-gradient-primary">Quiz</span>{' '}
             <span className="text-foreground">Interativo</span>
@@ -45,7 +42,7 @@ export default function HomePage() {
               onClick={handleCreateRoom}
               className="btn-primary w-full text-xl py-6"
             >
-              <span className="text-gradient-secondary font-bold">Criar Nova Sala</span>
+              <span className="text-white font-bold">Criar Nova Sala</span>
             </button>
             
             <div className="relative">
@@ -122,6 +119,17 @@ export default function HomePage() {
           <p className="text-muted-foreground">
             Ferramenta moderna para{' '}
             <span className="text-gradient-primary font-semibold">engajamento de equipes</span>
+          </p>
+          <p className="text-muted-foreground text-sm mt-4">
+            Criado por{' '}
+            <a 
+              href="https://www.linkedin.com/in/victorsmaniotto" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gradient-primary font-semibold hover:underline transition-all duration-200"
+            >
+              @VictorSmaniotto
+            </a>
           </p>
         </div>
       </div>

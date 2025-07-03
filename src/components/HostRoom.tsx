@@ -111,13 +111,13 @@ export default function HostRoom() {
             {/* Create New Question */}
             {!serverState.isQuizStarted && (
               <div className="card-modern animate-scale-in">
-                <h2 className="text-2xl font-bold mb-6">
-                  <span className="text-gradient-secondary">Nova Pergunta</span>
+                <h2 className="text-2xl font-bold mb-6 text-foreground">
+                  Nova Pergunta
                 </h2>
                 
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-lg font-semibold mb-3 text-primary">
+                    <label className="block text-lg font-semibold mb-3 text-foreground">
                       Pergunta
                     </label>
                     <Textarea
@@ -130,7 +130,7 @@ export default function HostRoom() {
                   </div>
 
                   <div>
-                    <label className="block text-lg font-semibold mb-3 text-secondary">
+                    <label className="block text-lg font-semibold mb-3 text-foreground">
                       Tipo
                     </label>
                     <Select
@@ -154,7 +154,7 @@ export default function HostRoom() {
 
                   {newQuestion.type !== 'text-input' && (
                     <div>
-                      <label className="block text-lg font-semibold mb-3 text-accent">
+                      <label className="block text-lg font-semibold mb-3 text-foreground">
                         Opções
                       </label>
                       <div className="space-y-3">

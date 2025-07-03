@@ -53,7 +53,7 @@ export default function QuestionManager() {
                   <span className="bg-gradient-to-r from-primary to-accent text-white px-3 py-1 rounded-xl text-sm font-bold">
                     {index + 1}
                   </span>
-                  <span className="text-sm font-semibold text-secondary">
+                  <span className="text-sm font-semibold text-foreground">
                     {getQuestionTypeLabel(question.type)}
                   </span>
                 </div>

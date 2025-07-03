@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuiz } from '../contexts/QuizContext';
+import { getParticipantColor } from '../utils/participantColors';
 
 export default function ParticipantsList() {
   const { serverState } = useQuiz();
@@ -25,24 +26,30 @@ export default function ParticipantsList() {
         </div>
       ) : (
         <div className="space-y-3">
-          {serverState.participants.map((participant, index) => (
-            <div 
-              key={participant.id} 
-              className="flex items-center gap-4 p-4 bg-card/50 rounded-2xl border border-border animate-fade-in transition-[var(--transition-normal)] hover:border-primary/50"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-2xl flex items-center justify-center text-white font-bold text-lg">
-                {participant.name.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-lg">{participant.name}</p>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
-                  <span className="text-sm text-success font-medium">Online</span>
+          {serverState.participants.map((participant, index) => {
+            const color = getParticipantColor(participant.id);
+            return (
+              <div 
+                key={participant.id} 
+                className={`flex items-center gap-4 p-4 bg-card/50 rounded-2xl border transition-[var(--transition-normal)] hover:border-opacity-80 animate-fade-in ${color.light} ${color.border} border-opacity-30`}
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-lg ${color.bg} ${color.text}`}>
+                  {participant.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-lg">{participant.name}</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+                    <span className="text-sm text-success font-medium">Online</span>
+                  </div>
+                </div>
+                <div className={`px-3 py-1 rounded-full text-xs font-semibold ${color.bg} ${color.text} opacity-75`}>
+                  {color.name}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
