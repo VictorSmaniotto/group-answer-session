@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuiz } from '../contexts/QuizContext';
 import { Textarea } from './ui/textarea';
 import { getParticipantColor } from '../utils/participantColors';
+import { debug } from '../utils/debug';
 
 export default function ParticipantRoom() {
   const { 
@@ -28,9 +29,9 @@ export default function ParticipantRoom() {
     if (!currentQuestion) return;
 
     const trimmedOption = option.trim();
-    console.log('Selecting option:', trimmedOption, 'at index:', index);
-    console.log('Current question type:', currentQuestion.type);
-    console.log('Current selected indexes:', selectedOptionIndexes);
+    debug('Selecting option:', trimmedOption, 'at index:', index);
+    debug('Current question type:', currentQuestion.type);
+    debug('Current selected indexes:', selectedOptionIndexes);
 
     if (currentQuestion.type === 'single-choice') {
       setSelectedAnswers([trimmedOption]);
@@ -66,7 +67,7 @@ export default function ParticipantRoom() {
       return;
     }
 
-    console.log('Submitting answer:', {
+    debug('Submitting answer:', {
       questionId: currentQuestion.id,
       answers
     });
