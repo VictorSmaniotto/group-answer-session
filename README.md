@@ -71,3 +71,24 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Configuração do ambiente
+
+Antes de rodar o aplicativo em produção, defina as variáveis de ambiente:
+
+1. Copie o arquivo de exemplo:
+
+```bash
+cp .env.production .env
+```
+
+2. Abra o arquivo `.env` e edite as variáveis principais:
+   - `VITE_PARTYKIT_HOST` – URL do seu PartyKit deployado.
+   - `VITE_PARTYKIT_PROTOCOL` – protocolo a ser usado (`https` por padrão).
+
+3. Salve o arquivo e inicie a versão de produção:
+
+```bash
+npm run build
+npm run preview
+```
