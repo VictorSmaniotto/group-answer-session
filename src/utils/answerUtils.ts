@@ -11,9 +11,16 @@ export function normalizeAnswer(str: string): string {
 
 // Compare two arrays of answers ignoring order, case and accents
 export function arraysEqual(a: string[] = [], b: string[] = []): boolean {
-  if (a.length !== b.length) return false;
+  console.log('DEBUG arraysEqual:', { a, b });
+  if (a.length !== b.length) {
+    console.log('DEBUG: Different lengths', a.length, 'vs', b.length);
+    return false;
+  }
   const normalize = (arr: string[]) => arr.map(normalizeAnswer).sort();
   const sortedA = normalize(a);
   const sortedB = normalize(b);
-  return sortedA.every((v, i) => v === sortedB[i]);
+  console.log('DEBUG: After normalization:', { sortedA, sortedB });
+  const result = sortedA.every((v, i) => v === sortedB[i]);
+  console.log('DEBUG: Final result:', result);
+  return result;
 }

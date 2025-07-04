@@ -26,9 +26,9 @@ export default function HostRoom() {
         text: newQuestion.text.trim(),
         type: newQuestion.type as Question['type'],
         options: newQuestion.type !== 'text-input'
-          ? newQuestion.options?.filter(opt => opt.trim())
+          ? newQuestion.options?.filter(opt => opt.trim()).map(opt => opt.trim())
           : undefined,
-        correctAnswers: newQuestion.correctAnswers?.filter(a => a.trim()),
+        correctAnswers: newQuestion.correctAnswers?.filter(a => a.trim()).map(a => a.trim()),
         graded: newQuestion.graded
       };
 
@@ -54,11 +54,11 @@ export default function HostRoom() {
 
   const handleRemoveOption = (index: number) => {
     if (newQuestion.options && newQuestion.options.length > 2) {
-      const removed = newQuestion.options[index];
+      const removedTrimmed = newQuestion.options[index].trim();
       setNewQuestion({
         ...newQuestion,
         options: newQuestion.options.filter((_, i) => i !== index),
-        correctAnswers: newQuestion.correctAnswers?.filter(a => a !== removed)
+        correctAnswers: newQuestion.correctAnswers?.filter(a => a !== removedTrimmed)
       });
     }
   };
@@ -66,12 +66,13 @@ export default function HostRoom() {
   const updateOption = (index: number, value: string) => {
     if (newQuestion.options) {
       const updatedOptions = [...newQuestion.options];
-      const old = updatedOptions[index];
+      const oldTrimmed = updatedOptions[index].trim();
       updatedOptions[index] = value;
+      const newTrimmed = value.trim();
       setNewQuestion({
         ...newQuestion,
         options: updatedOptions,
-        correctAnswers: newQuestion.correctAnswers?.map(a => a === old ? value : a)
+        correctAnswers: newQuestion.correctAnswers?.map(a => a === oldTrimmed ? newTrimmed : a)
       });
     }
   };
@@ -191,11 +192,11 @@ export default function HostRoom() {
                                 <input
                                   type="radio"
                                   className="h-5 w-5 text-primary"
-                                  checked={newQuestion.correctAnswers?.[0] === option}
+                                  checked={newQuestion.correctAnswers?.[0] === option.trim()}
                                   onChange={() =>
                                     setNewQuestion({
                                       ...newQuestion,
-                                      correctAnswers: [option]
+                                      correctAnswers: [option.trim()]
                                     })
                                   }
                                 />
@@ -203,14 +204,15 @@ export default function HostRoom() {
                                 <input
                                   type="checkbox"
                                   className="h-5 w-5 text-primary"
-                                  checked={newQuestion.correctAnswers?.includes(option)}
+                                  checked={newQuestion.correctAnswers?.includes(option.trim())}
                                   onChange={() => {
-                                    const exists = newQuestion.correctAnswers?.includes(option);
+                                    const trimmedOption = option.trim();
+                                    const exists = newQuestion.correctAnswers?.includes(trimmedOption);
                                     setNewQuestion({
                                       ...newQuestion,
                                       correctAnswers: exists
-                                        ? newQuestion.correctAnswers?.filter(a => a !== option)
-                                        : [...(newQuestion.correctAnswers || []), option]
+                                        ? newQuestion.correctAnswers?.filter(a => a !== trimmedOption)
+                                        : [...(newQuestion.correctAnswers || []), trimmedOption]
                                     });
                                   }}
                                 />
@@ -255,7 +257,7 @@ export default function HostRoom() {
                         onChange={(e) =>
                           setNewQuestion({
                             ...newQuestion,
-                            correctAnswers: [e.target.value]
+                            correctAnswers: [e.target.value.trim()]
                           })
                         }
                         placeholder="Digite a resposta correta"

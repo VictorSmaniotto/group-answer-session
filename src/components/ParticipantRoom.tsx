@@ -21,13 +21,13 @@ export default function ParticipantRoom() {
   const [textAnswer, setTextAnswer] = useState('');
   const [answerResult, setAnswerResult] = useState<'correct' | 'incorrect' | null>(null);
 
-  // Reset local answer state when a new question arrives
+  // Reset local answer state apenas quando o ID da pergunta mudar
   useEffect(() => {
     setSelectedAnswers([]);
     setSelectedOptionIndexes([]);
     setTextAnswer('');
     setAnswerResult(null);
-  }, [currentQuestion]);
+  }, [currentQuestion?.id]);
 
   const handleOptionSelect = (option: string, index: number) => {
     if (!currentQuestion) return;
@@ -86,7 +86,13 @@ export default function ParticipantRoom() {
 
     const gradedQuestion = currentQuestion.graded && currentQuestion.correctAnswers && currentQuestion.correctAnswers.length > 0;
     if (gradedQuestion) {
+      console.log('DEBUG: Checking answer correctness:', {
+        submittedAnswers: answers,
+        correctAnswers: currentQuestion.correctAnswers,
+        question: currentQuestion.text
+      });
       const correct = arraysEqual(answers, currentQuestion.correctAnswers);
+      console.log('DEBUG: Answer result:', correct);
       setAnswerResult(correct ? 'correct' : 'incorrect');
     }
   };
@@ -169,8 +175,11 @@ export default function ParticipantRoom() {
             <div className="text-center py-16 animate-fade-in">
               {isGraded ? (
                 <>
-                  <div className={`w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center ${answerResult === 'correct' ? 'bg-success' : 'bg-destructive'}`}>
-                    <span className="text-white text-2xl">{answerResult === 'correct' ? '✓' : '✕'}</span>
+                  <div className={`w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center ${answerResult === 'correct' ? 'bg-green-600' : 'bg-destructive'}`}
+                  >
+                    <span className="text-white text-5xl font-bold">
+                      {answerResult === 'correct' ? '✓' : '✕'}
+                    </span>
                   </div>
                   <h2 className="text-2xl font-bold mb-4">
                     {answerResult === 'correct' ? (
