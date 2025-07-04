@@ -119,8 +119,8 @@ export default function HostRoom() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Question Management */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Create New Question */}
-            {!serverState.isQuizStarted && (
+            {/* Create New Question - now available even after the quiz starts */}
+            {!serverState.isQuizFinished && (
               <div className="card-modern animate-scale-in">
                 <h2 className="text-2xl font-bold mb-6 text-foreground">
                   Nova Pergunta

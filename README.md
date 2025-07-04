@@ -60,6 +60,12 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Key Features
+
+- Real-time interactive quiz
+- Export of results in multiple formats
+- **Add new questions even after the quiz has started**
+
 ## How do I run tests?
 
 Run the test suite with:
