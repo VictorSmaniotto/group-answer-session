@@ -6,6 +6,7 @@ export interface Question {
   text: string;
   type: 'single-choice' | 'multi-choice' | 'text-input';
   options?: string[];
+  correctAnswers?: string[];
 }
 
 // Define the shape of a participant

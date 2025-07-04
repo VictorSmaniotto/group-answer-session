@@ -12,6 +12,7 @@ export interface ExportData {
     text: string;
     type: string;
     options?: string[];
+    correctAnswers?: string[];
     responses: Array<{
       participantName: string;
       participantId: string;
@@ -79,6 +80,7 @@ export function processQuizData(serverState: QuizState): ExportData {
       text: question.text,
       type: question.type,
       options: question.options,
+      correctAnswers: question.correctAnswers,
       responses,
       statistics,
     };

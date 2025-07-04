@@ -2,9 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useQuiz } from '../contexts/QuizContext';
 import { Textarea } from './ui/textarea';
 import { getParticipantColor } from '../utils/participantColors';
+import ScoreBoard from './ScoreBoard';
 import { debug } from '../utils/debug';
 
+
+function arraysEqual(a: string[] = [], b: string[] = []) {
+  if (a.length !== b.length) return false;
+  const sortedA = [...a].map(v => v.trim()).sort();
+  const sortedB = [...b].map(v => v.trim()).sort();
+  return sortedA.every((v, i) => v === sortedB[i]);
+}
 export default function ParticipantRoom() {
+
   const { 
     serverState, 
     clientState, 
@@ -17,12 +26,14 @@ export default function ParticipantRoom() {
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   const [selectedOptionIndexes, setSelectedOptionIndexes] = useState<number[]>([]);
   const [textAnswer, setTextAnswer] = useState('');
+  const [answerResult, setAnswerResult] = useState<'correct' | 'incorrect' | null>(null);
 
   // Reset local answer state when a new question arrives
   useEffect(() => {
     setSelectedAnswers([]);
     setSelectedOptionIndexes([]);
     setTextAnswer('');
+    setAnswerResult(null);
   }, [currentQuestion]);
 
   const handleOptionSelect = (option: string, index: number) => {
@@ -79,6 +90,11 @@ export default function ParticipantRoom() {
         answers
       }
     });
+
+    if (currentQuestion.correctAnswers && currentQuestion.correctAnswers.length > 0) {
+      const correct = arraysEqual(answers, currentQuestion.correctAnswers);
+      setAnswerResult(correct ? 'correct' : 'incorrect');
+    }
   };
 
   const isAnswerSelected = currentQuestion?.type === 'text-input' 
@@ -95,8 +111,9 @@ export default function ParticipantRoom() {
           <h1 className="text-4xl font-bold mb-4">
             <span className="text-gradient-primary">Quiz Finalizado!</span>
           </h1>
-          <p className="text-muted-foreground text-xl mb-8">
-            Obrigado por participar! Suas respostas foram registradas.
+          <ScoreBoard />
+          <p className="text-muted-foreground text-xl mb-8 mt-6">
+            Obrigado por participar!
           </p>
           <button
             onClick={leaveRoom}
@@ -151,18 +168,39 @@ export default function ParticipantRoom() {
                 O anfitrião está preparando as perguntas
               </p>
             </div>
-          ) : hasAnsweredCurrentQuestion ? (
-            // Answer submitted, waiting for next question
-            <div className="text-center py-16">
-              <div className="w-20 h-20 bg-gradient-to-r from-success to-accent rounded-full mx-auto mb-8 flex items-center justify-center">
-                <span className="text-white text-2xl">✓</span>
+          ) : hasAnsweredCurrentQuestion && currentQuestion ? (
+            // Show result
+            <div className="text-center py-16 animate-fade-in">
+              <div className={`w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center ${answerResult === 'correct' ? 'bg-success' : 'bg-destructive'}`}> 
+                <span className="text-white text-2xl">{answerResult === 'correct' ? '✓' : '✕'}</span>
               </div>
               <h2 className="text-2xl font-bold mb-4">
-                <span className="text-gradient-primary">Resposta enviada!</span>
+                {answerResult === 'correct' ? (
+                  <span className="text-gradient-primary">Você acertou!</span>
+                ) : (
+                  <span className="text-destructive">Você errou!</span>
+                )}
               </h2>
-              <p className="text-muted-foreground text-lg">
-                Aguardando a próxima pergunta...
-              </p>
+              {currentQuestion.type !== 'text-input' ? (
+                <div className="space-y-3 mb-4">
+                  {currentQuestion.options?.map((option, index) => {
+                    const isSelected = selectedOptionIndexes.includes(index);
+                    const correct = currentQuestion.correctAnswers?.includes(option.trim());
+                    const color = isSelected ? (answerResult === 'correct' ? 'border-success bg-success/20' : 'border-destructive bg-destructive/20') : 'border-border';
+                    const textColor = isSelected ? (answerResult === 'correct' ? 'text-success' : 'text-destructive') : '';
+                    return (
+                      <div key={index} className={`flex items-center gap-3 p-3 rounded-xl border ${color} ${textColor}`}> 
+                        <span className="font-semibold">{String.fromCharCode(65 + index)}.</span>
+                        <span className="flex-1 text-left">{option}</span>
+                        {correct && <span className="text-sm text-success font-bold">✓</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className={`text-lg font-semibold ${answerResult === 'correct' ? 'text-success' : 'text-destructive'}`}>{textAnswer}</p>
+              )}
+              <p className="text-muted-foreground text-lg mt-4">Aguardando a próxima pergunta...</p>
             </div>
           ) : currentQuestion ? (
             // Active question
