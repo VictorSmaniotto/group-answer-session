@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import { debug } from '../utils/debug';
 import usePartySocket from 'partysocket/react';
 import type { QuizState, Question, Participant, Answer } from '../../party/server';
 
@@ -54,7 +55,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       // Only proceed if we have a real room ID
       if (!clientState.roomId) return;
       
-      console.log('Socket connected, event:', e);
+      debug('Socket connected, event:', e);
       
       // Identify self to the server first, the server will use sender.id as participant ID
       const identifyMessage = { 
@@ -62,21 +63,21 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         name: clientState.participantName, 
         isHost: clientState.isHost 
       };
-      console.log('Sending identify message:', identifyMessage);
+      debug('Sending identify message:', identifyMessage);
       socket.send(JSON.stringify(identifyMessage));
     },
     onMessage: (event) => {
-      console.log('Received message:', event.data);
+      debug('Received message:', event.data);
       const message = JSON.parse(event.data);
       if (message.type === 'sync') {
-        console.log('Syncing state:', message.state);
+        debug('Syncing state:', message.state);
         setServerState(message.state);
         
         // Update participantId based on server state if we're a participant
         if (!clientState.isHost && clientState.participantName && !clientState.participantId) {
           const participant = message.state.participants.find((p: Participant) => p.name === clientState.participantName);
           if (participant) {
-            console.log('Found participant in server state:', participant.id);
+            debug('Found participant in server state:', participant.id);
             setClientState(s => ({ ...s, participantId: participant.id }));
           }
         }
@@ -86,7 +87,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         console.error('Server Error:', message.message);
       }
       if (message.type === 'hostDisconnected') {
-        console.log('Host disconnected. The quiz may be reset.');
+        debug('Host disconnected. The quiz may be reset.');
         // Optionally, reset client state or show a message
       }
     },
@@ -94,7 +95,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
       console.error('Socket error:', error);
     },
     onClose: (event) => {
-      console.log('Socket closed:', event);
+      debug('Socket closed:', event);
     }
   });
 
@@ -123,7 +124,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
 
   // Debug logging
   useEffect(() => {
-    console.log('Debug - hasAnsweredCurrentQuestion calculation:', {
+    debug('Debug - hasAnsweredCurrentQuestion calculation:', {
       currentQuestion: !!currentQuestion,
       currentQuestionId: currentQuestion?.id,
       participantId: clientState.participantId,

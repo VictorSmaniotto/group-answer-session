@@ -3,6 +3,7 @@ import { useQuiz } from '../contexts/QuizContext';
 import { Textarea } from './ui/textarea';
 import { getParticipantColor } from '../utils/participantColors';
 import ScoreBoard from './ScoreBoard';
+import { debug } from '../utils/debug';
 
 function arraysEqual(a: string[] = [], b: string[] = []) {
   if (a.length !== b.length) return false;
@@ -10,8 +11,8 @@ function arraysEqual(a: string[] = [], b: string[] = []) {
   const sortedB = [...b].map(v => v.trim()).sort();
   return sortedA.every((v, i) => v === sortedB[i]);
 }
-
 export default function ParticipantRoom() {
+
   const { 
     serverState, 
     clientState, 
@@ -38,9 +39,9 @@ export default function ParticipantRoom() {
     if (!currentQuestion) return;
 
     const trimmedOption = option.trim();
-    console.log('Selecting option:', trimmedOption, 'at index:', index);
-    console.log('Current question type:', currentQuestion.type);
-    console.log('Current selected indexes:', selectedOptionIndexes);
+    debug('Selecting option:', trimmedOption, 'at index:', index);
+    debug('Current question type:', currentQuestion.type);
+    debug('Current selected indexes:', selectedOptionIndexes);
 
     if (currentQuestion.type === 'single-choice') {
       setSelectedAnswers([trimmedOption]);
@@ -76,7 +77,7 @@ export default function ParticipantRoom() {
       return;
     }
 
-    console.log('Submitting answer:', {
+    debug('Submitting answer:', {
       questionId: currentQuestion.id,
       answers
     });
