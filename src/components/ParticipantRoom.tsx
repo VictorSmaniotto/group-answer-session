@@ -92,15 +92,18 @@ export default function ParticipantRoom() {
       }
     });
 
-    if (currentQuestion.graded && currentQuestion.correctAnswers && currentQuestion.correctAnswers.length > 0) {
+    const gradedQuestion = currentQuestion.graded && currentQuestion.correctAnswers && currentQuestion.correctAnswers.length > 0;
+    if (gradedQuestion) {
       const correct = arraysEqual(answers, currentQuestion.correctAnswers);
       setAnswerResult(correct ? 'correct' : 'incorrect');
     }
   };
 
-  const isAnswerSelected = currentQuestion?.type === 'text-input' 
+  const isAnswerSelected = currentQuestion?.type === 'text-input'
     ? textAnswer.trim().length > 0
     : selectedOptionIndexes.length > 0;
+
+  const isGraded = !!(currentQuestion?.graded && currentQuestion.correctAnswers && currentQuestion.correctAnswers.length > 0);
 
   if (serverState.isQuizFinished) {
     return (
@@ -172,34 +175,63 @@ export default function ParticipantRoom() {
           ) : hasAnsweredCurrentQuestion && currentQuestion ? (
             // Show result
             <div className="text-center py-16 animate-fade-in">
-              <div className={`w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center ${answerResult === 'correct' ? 'bg-success' : 'bg-destructive'}`}> 
-                <span className="text-white text-2xl">{answerResult === 'correct' ? '✓' : '✕'}</span>
-              </div>
-              <h2 className="text-2xl font-bold mb-4">
-                {answerResult === 'correct' ? (
-                  <span className="text-gradient-primary">Você acertou!</span>
-                ) : (
-                  <span className="text-destructive">Você errou!</span>
-                )}
-              </h2>
-              {currentQuestion.type !== 'text-input' ? (
-                <div className="space-y-3 mb-4">
-                  {currentQuestion.options?.map((option, index) => {
-                    const isSelected = selectedOptionIndexes.includes(index);
-                    const correct = currentQuestion.graded && currentQuestion.correctAnswers?.includes(option.trim());
-                    const color = isSelected ? (answerResult === 'correct' ? 'border-success bg-success/20' : 'border-destructive bg-destructive/20') : 'border-border';
-                    const textColor = isSelected ? (answerResult === 'correct' ? 'text-success' : 'text-destructive') : '';
-                    return (
-                      <div key={index} className={`flex items-center gap-3 p-3 rounded-xl border ${color} ${textColor}`}> 
-                        <span className="font-semibold">{String.fromCharCode(65 + index)}.</span>
-                        <span className="flex-1 text-left">{option}</span>
-                        {correct && <span className="text-sm text-success font-bold">✓</span>}
-                      </div>
-                    );
-                  })}
-                </div>
+              {isGraded ? (
+                <>
+                  <div className={`w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center ${answerResult === 'correct' ? 'bg-success' : 'bg-destructive'}`}>
+                    <span className="text-white text-2xl">{answerResult === 'correct' ? '✓' : '✕'}</span>
+                  </div>
+                  <h2 className="text-2xl font-bold mb-4">
+                    {answerResult === 'correct' ? (
+                      <span className="text-gradient-primary">Você acertou!</span>
+                    ) : (
+                      <span className="text-destructive">Você errou!</span>
+                    )}
+                  </h2>
+                  {currentQuestion.type !== 'text-input' ? (
+                    <div className="space-y-3 mb-4">
+                      {currentQuestion.options?.map((option, index) => {
+                        const isSelected = selectedOptionIndexes.includes(index);
+                        const correct = currentQuestion.graded && currentQuestion.correctAnswers?.includes(option.trim());
+                        const color = isSelected ? (answerResult === 'correct' ? 'border-success bg-success/20' : 'border-destructive bg-destructive/20') : 'border-border';
+                        const textColor = isSelected ? (answerResult === 'correct' ? 'text-success' : 'text-destructive') : '';
+                        return (
+                          <div key={index} className={`flex items-center gap-3 p-3 rounded-xl border ${color} ${textColor}`}>
+                            <span className="font-semibold">{String.fromCharCode(65 + index)}.</span>
+                            <span className="flex-1 text-left">{option}</span>
+                            {correct && <span className="text-sm text-success font-bold">✓</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className={`text-lg font-semibold ${answerResult === 'correct' ? 'text-success' : 'text-destructive'}`}>{textAnswer}</p>
+                  )}
+                </>
               ) : (
-                <p className={`text-lg font-semibold ${answerResult === 'correct' ? 'text-success' : 'text-destructive'}`}>{textAnswer}</p>
+                <>
+                  <div className="w-20 h-20 bg-gradient-to-r from-success to-accent rounded-full mx-auto mb-6 flex items-center justify-center">
+                    <span className="text-white text-2xl">✓</span>
+                  </div>
+                  <h2 className="text-2xl font-bold mb-4">
+                    <span className="text-gradient-primary">Resposta enviada!</span>
+                  </h2>
+                  {currentQuestion.type !== 'text-input' ? (
+                    <div className="space-y-3 mb-4">
+                      {currentQuestion.options?.map((option, index) => {
+                        const isSelected = selectedOptionIndexes.includes(index);
+                        const color = isSelected ? 'border-success bg-success/20' : 'border-border';
+                        return (
+                          <div key={index} className={`flex items-center gap-3 p-3 rounded-xl border ${color}`}> 
+                            <span className="font-semibold">{String.fromCharCode(65 + index)}.</span>
+                            <span className="flex-1 text-left">{option}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-lg font-semibold text-success">{textAnswer}</p>
+                  )}
+                </>
               )}
               <p className="text-muted-foreground text-lg mt-4">Aguardando a próxima pergunta...</p>
             </div>
