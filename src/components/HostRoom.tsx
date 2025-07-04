@@ -14,7 +14,8 @@ export default function HostRoom() {
   const [newQuestion, setNewQuestion] = useState<Partial<Question>>({
     text: '',
     type: 'single-choice',
-    options: ['', '']
+    options: ['', ''],
+    correctAnswers: []
   });
 
   const handleAddQuestion = () => {
@@ -23,16 +24,18 @@ export default function HostRoom() {
         id: generateQuestionId(),
         text: newQuestion.text.trim(),
         type: newQuestion.type as Question['type'],
-        options: newQuestion.type !== 'text-input' 
-          ? newQuestion.options?.filter(opt => opt.trim()) 
-          : undefined
+        options: newQuestion.type !== 'text-input'
+          ? newQuestion.options?.filter(opt => opt.trim())
+          : undefined,
+        correctAnswers: newQuestion.correctAnswers?.filter(a => a.trim())
       };
 
       send({ type: 'addQuestion', question });
       setNewQuestion({
         text: '',
         type: 'single-choice',
-        options: ['', '']
+        options: ['', ''],
+        correctAnswers: []
       });
     }
   };
@@ -48,9 +51,11 @@ export default function HostRoom() {
 
   const handleRemoveOption = (index: number) => {
     if (newQuestion.options && newQuestion.options.length > 2) {
+      const removed = newQuestion.options[index];
       setNewQuestion({
         ...newQuestion,
-        options: newQuestion.options.filter((_, i) => i !== index)
+        options: newQuestion.options.filter((_, i) => i !== index),
+        correctAnswers: newQuestion.correctAnswers?.filter(a => a !== removed)
       });
     }
   };
@@ -58,10 +63,12 @@ export default function HostRoom() {
   const updateOption = (index: number, value: string) => {
     if (newQuestion.options) {
       const updatedOptions = [...newQuestion.options];
+      const old = updatedOptions[index];
       updatedOptions[index] = value;
       setNewQuestion({
         ...newQuestion,
-        options: updatedOptions
+        options: updatedOptions,
+        correctAnswers: newQuestion.correctAnswers?.map(a => a === old ? value : a)
       });
     }
   };
@@ -135,10 +142,11 @@ export default function HostRoom() {
                     </label>
                     <Select
                       value={newQuestion.type}
-                      onValueChange={(value) => setNewQuestion({ 
-                        ...newQuestion, 
+                      onValueChange={(value) => setNewQuestion({
+                        ...newQuestion,
                         type: value as Question['type'],
-                        options: value !== 'text-input' ? ['', ''] : undefined
+                        options: value !== 'text-input' ? ['', ''] : undefined,
+                        correctAnswers: []
                       })}
                     >
                       <SelectTrigger className="text-lg py-4 px-6 rounded-2xl border-2">
@@ -159,7 +167,35 @@ export default function HostRoom() {
                       </label>
                       <div className="space-y-3">
                         {newQuestion.options?.map((option, index) => (
-                          <div key={index} className="flex gap-3">
+                          <div key={index} className="flex gap-3 items-center">
+                            {newQuestion.type === 'single-choice' ? (
+                              <input
+                                type="radio"
+                                className="h-5 w-5 text-primary"
+                                checked={newQuestion.correctAnswers?.[0] === option}
+                                onChange={() =>
+                                  setNewQuestion({
+                                    ...newQuestion,
+                                    correctAnswers: [option]
+                                  })
+                                }
+                              />
+                            ) : (
+                              <input
+                                type="checkbox"
+                                className="h-5 w-5 text-primary"
+                                checked={newQuestion.correctAnswers?.includes(option)}
+                                onChange={() => {
+                                  const exists = newQuestion.correctAnswers?.includes(option);
+                                  setNewQuestion({
+                                    ...newQuestion,
+                                    correctAnswers: exists
+                                      ? newQuestion.correctAnswers?.filter(a => a !== option)
+                                      : [...(newQuestion.correctAnswers || []), option]
+                                  });
+                                }}
+                              />
+                            )}
                             <Input
                               value={option}
                               onChange={(e) => updateOption(index, e.target.value)}
@@ -189,9 +225,33 @@ export default function HostRoom() {
                     </div>
                   )}
 
+                  {newQuestion.type === 'text-input' && (
+                    <div>
+                      <label className="block text-lg font-semibold mb-3 text-foreground">
+                        Resposta Correta
+                      </label>
+                      <Input
+                        value={newQuestion.correctAnswers?.[0] || ''}
+                        onChange={(e) =>
+                          setNewQuestion({
+                            ...newQuestion,
+                            correctAnswers: [e.target.value]
+                          })
+                        }
+                        placeholder="Digite a resposta correta"
+                        className="text-lg py-3 px-4 rounded-xl border-2"
+                      />
+                    </div>
+                  )}
+
                   <button
                     onClick={handleAddQuestion}
-                    disabled={!newQuestion.text?.trim() || (newQuestion.type !== 'text-input' && (!newQuestion.options || newQuestion.options.filter(opt => opt.trim()).length < 2))}
+                    disabled={
+                      !newQuestion.text?.trim() ||
+                      (newQuestion.type !== 'text-input' &&
+                        (!newQuestion.options || newQuestion.options.filter(opt => opt.trim()).length < 2)) ||
+                      !newQuestion.correctAnswers || newQuestion.correctAnswers.length === 0
+                    }
                     className="btn-primary w-full text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     Adicionar Pergunta
