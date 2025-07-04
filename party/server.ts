@@ -51,8 +51,8 @@ function isQuizMessage(msg: any): msg is QuizMessage {
   switch (msg.type) {
     case 'identify':
       return (
-        typeof msg.name === 'string' &&
-        typeof msg.isHost === 'boolean'
+        typeof msg.isHost === 'boolean' &&
+        (msg.isHost || typeof msg.name === 'string')
       );
     case 'addQuestion':
       return typeof msg.question === 'object' && typeof msg.question.id === 'string';
