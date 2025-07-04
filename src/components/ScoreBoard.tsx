@@ -1,13 +1,6 @@
 import React from 'react';
 import { useQuiz } from '../contexts/QuizContext';
-
-function arraysEqual(a: string[] = [], b: string[] = []) {
-  if (a.length !== b.length) return false;
-  const normalize = (arr: string[]) => arr.map(v => v.trim().toLowerCase()).sort();
-  const sortedA = normalize(a);
-  const sortedB = normalize(b);
-  return sortedA.every((v, i) => v === sortedB[i]);
-}
+import { arraysEqual } from '../utils/answerUtils';
 
 export default function ScoreBoard() {
   const { serverState, clientState } = useQuiz();
