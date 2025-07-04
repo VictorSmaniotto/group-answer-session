@@ -15,7 +15,8 @@ export default function HostRoom() {
     text: '',
     type: 'single-choice',
     options: ['', ''],
-    correctAnswers: []
+    correctAnswers: [],
+    graded: false
   });
 
   const handleAddQuestion = () => {
@@ -27,7 +28,8 @@ export default function HostRoom() {
         options: newQuestion.type !== 'text-input'
           ? newQuestion.options?.filter(opt => opt.trim())
           : undefined,
-        correctAnswers: newQuestion.correctAnswers?.filter(a => a.trim())
+        correctAnswers: newQuestion.correctAnswers?.filter(a => a.trim()),
+        graded: newQuestion.graded
       };
 
       send({ type: 'addQuestion', question });
@@ -35,7 +37,8 @@ export default function HostRoom() {
         text: '',
         type: 'single-choice',
         options: ['', ''],
-        correctAnswers: []
+        correctAnswers: [],
+        graded: false
       });
     }
   };
@@ -140,15 +143,15 @@ export default function HostRoom() {
                     <label className="block text-lg font-semibold mb-3 text-foreground">
                       Tipo
                     </label>
-                    <Select
-                      value={newQuestion.type}
-                      onValueChange={(value) => setNewQuestion({
-                        ...newQuestion,
-                        type: value as Question['type'],
-                        options: value !== 'text-input' ? ['', ''] : undefined,
-                        correctAnswers: []
-                      })}
-                    >
+                  <Select
+                    value={newQuestion.type}
+                    onValueChange={(value) => setNewQuestion({
+                      ...newQuestion,
+                      type: value as Question['type'],
+                      options: value !== 'text-input' ? ['', ''] : undefined,
+                      correctAnswers: []
+                    })}
+                  >
                       <SelectTrigger className="text-lg py-4 px-6 rounded-2xl border-2">
                         <SelectValue />
                       </SelectTrigger>
@@ -157,8 +160,23 @@ export default function HostRoom() {
                         <SelectItem value="multi-choice">Múltiplas Escolhas</SelectItem>
                         <SelectItem value="text-input">Resposta Livre</SelectItem>
                       </SelectContent>
-                    </Select>
+                  </Select>
+                  <div className="flex items-center gap-3 mt-4">
+                    <input
+                      type="checkbox"
+                      className="h-5 w-5 text-primary"
+                      checked={newQuestion.graded}
+                      onChange={(e) =>
+                        setNewQuestion({
+                          ...newQuestion,
+                          graded: e.target.checked,
+                          correctAnswers: []
+                        })
+                      }
+                    />
+                    <span className="text-lg">Habilitar resposta correta</span>
                   </div>
+                </div>
 
                   {newQuestion.type !== 'text-input' && (
                     <div>
@@ -168,33 +186,35 @@ export default function HostRoom() {
                       <div className="space-y-3">
                         {newQuestion.options?.map((option, index) => (
                           <div key={index} className="flex gap-3 items-center">
-                            {newQuestion.type === 'single-choice' ? (
-                              <input
-                                type="radio"
-                                className="h-5 w-5 text-primary"
-                                checked={newQuestion.correctAnswers?.[0] === option}
-                                onChange={() =>
-                                  setNewQuestion({
-                                    ...newQuestion,
-                                    correctAnswers: [option]
-                                  })
-                                }
-                              />
-                            ) : (
-                              <input
-                                type="checkbox"
-                                className="h-5 w-5 text-primary"
-                                checked={newQuestion.correctAnswers?.includes(option)}
-                                onChange={() => {
-                                  const exists = newQuestion.correctAnswers?.includes(option);
-                                  setNewQuestion({
-                                    ...newQuestion,
-                                    correctAnswers: exists
-                                      ? newQuestion.correctAnswers?.filter(a => a !== option)
-                                      : [...(newQuestion.correctAnswers || []), option]
-                                  });
-                                }}
-                              />
+                            {newQuestion.graded && (
+                              newQuestion.type === 'single-choice' ? (
+                                <input
+                                  type="radio"
+                                  className="h-5 w-5 text-primary"
+                                  checked={newQuestion.correctAnswers?.[0] === option}
+                                  onChange={() =>
+                                    setNewQuestion({
+                                      ...newQuestion,
+                                      correctAnswers: [option]
+                                    })
+                                  }
+                                />
+                              ) : (
+                                <input
+                                  type="checkbox"
+                                  className="h-5 w-5 text-primary"
+                                  checked={newQuestion.correctAnswers?.includes(option)}
+                                  onChange={() => {
+                                    const exists = newQuestion.correctAnswers?.includes(option);
+                                    setNewQuestion({
+                                      ...newQuestion,
+                                      correctAnswers: exists
+                                        ? newQuestion.correctAnswers?.filter(a => a !== option)
+                                        : [...(newQuestion.correctAnswers || []), option]
+                                    });
+                                  }}
+                                />
+                              )
                             )}
                             <Input
                               value={option}
@@ -225,7 +245,7 @@ export default function HostRoom() {
                     </div>
                   )}
 
-                  {newQuestion.type === 'text-input' && (
+                  {newQuestion.type === 'text-input' && newQuestion.graded && (
                     <div>
                       <label className="block text-lg font-semibold mb-3 text-foreground">
                         Resposta Correta
@@ -246,12 +266,12 @@ export default function HostRoom() {
 
                   <button
                     onClick={handleAddQuestion}
-                    disabled={
-                      !newQuestion.text?.trim() ||
-                      (newQuestion.type !== 'text-input' &&
-                        (!newQuestion.options || newQuestion.options.filter(opt => opt.trim()).length < 2)) ||
-                      !newQuestion.correctAnswers || newQuestion.correctAnswers.length === 0
-                    }
+                  disabled={
+                    !newQuestion.text?.trim() ||
+                    (newQuestion.type !== 'text-input' &&
+                      (!newQuestion.options || newQuestion.options.filter(opt => opt.trim()).length < 2)) ||
+                      (newQuestion.graded && (!newQuestion.correctAnswers || newQuestion.correctAnswers.length === 0))
+                  }
                     className="btn-primary w-full text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     Adicionar Pergunta

@@ -8,8 +8,9 @@ import { debug } from '../utils/debug';
 
 function arraysEqual(a: string[] = [], b: string[] = []) {
   if (a.length !== b.length) return false;
-  const sortedA = [...a].map(v => v.trim()).sort();
-  const sortedB = [...b].map(v => v.trim()).sort();
+  const normalize = (arr: string[]) => arr.map(v => v.trim().toLowerCase()).sort();
+  const sortedA = normalize(a);
+  const sortedB = normalize(b);
   return sortedA.every((v, i) => v === sortedB[i]);
 }
 export default function ParticipantRoom() {
@@ -91,7 +92,7 @@ export default function ParticipantRoom() {
       }
     });
 
-    if (currentQuestion.correctAnswers && currentQuestion.correctAnswers.length > 0) {
+    if (currentQuestion.graded && currentQuestion.correctAnswers && currentQuestion.correctAnswers.length > 0) {
       const correct = arraysEqual(answers, currentQuestion.correctAnswers);
       setAnswerResult(correct ? 'correct' : 'incorrect');
     }
@@ -185,7 +186,7 @@ export default function ParticipantRoom() {
                 <div className="space-y-3 mb-4">
                   {currentQuestion.options?.map((option, index) => {
                     const isSelected = selectedOptionIndexes.includes(index);
-                    const correct = currentQuestion.correctAnswers?.includes(option.trim());
+                    const correct = currentQuestion.graded && currentQuestion.correctAnswers?.includes(option.trim());
                     const color = isSelected ? (answerResult === 'correct' ? 'border-success bg-success/20' : 'border-destructive bg-destructive/20') : 'border-border';
                     const textColor = isSelected ? (answerResult === 'correct' ? 'text-success' : 'text-destructive') : '';
                     return (

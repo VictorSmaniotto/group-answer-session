@@ -69,7 +69,7 @@ export default function QuestionManager() {
                     ))}
                   </div>
                 )}
-                {question.correctAnswers && question.correctAnswers.length > 0 && (
+                {question.graded && question.correctAnswers && question.correctAnswers.length > 0 && (
                   <p className="text-sm mt-2 text-muted-foreground">
                     Resposta correta: {question.correctAnswers.join(', ')}
                   </p>
