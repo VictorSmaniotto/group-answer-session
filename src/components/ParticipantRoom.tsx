@@ -5,6 +5,7 @@ import { getParticipantColor } from '../utils/participantColors';
 import ScoreBoard from './ScoreBoard';
 import { debug } from '../utils/debug';
 
+
 function arraysEqual(a: string[] = [], b: string[] = []) {
   if (a.length !== b.length) return false;
   const sortedA = [...a].map(v => v.trim()).sort();
