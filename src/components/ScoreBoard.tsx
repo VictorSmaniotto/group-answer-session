@@ -3,8 +3,9 @@ import { useQuiz } from '../contexts/QuizContext';
 
 function arraysEqual(a: string[] = [], b: string[] = []) {
   if (a.length !== b.length) return false;
-  const sortedA = [...a].sort();
-  const sortedB = [...b].sort();
+  const normalize = (arr: string[]) => arr.map(v => v.trim().toLowerCase()).sort();
+  const sortedA = normalize(a);
+  const sortedB = normalize(b);
   return sortedA.every((v, i) => v === sortedB[i]);
 }
 
@@ -18,7 +19,7 @@ export default function ScoreBoard() {
   if (participantId) {
     serverState.questions.forEach(q => {
       const ans = serverState.answers[q.id]?.[participantId];
-      if (ans && q.correctAnswers && q.correctAnswers.length > 0) {
+      if (ans && q.graded && q.correctAnswers && q.correctAnswers.length > 0) {
         if (arraysEqual(ans, q.correctAnswers)) correct++; else wrong++;
       }
     });
